@@ -63,7 +63,7 @@ class UserServiceTest {
     @Test
     void findUserById() {
         // given
-        User user = User.builder().username("yeop").password("1234").build();
+        User user = User.builder().username("yeop").password("12345678").build();
         User save = userRepository.save(user);
         Long id = save.getId();
         // when
