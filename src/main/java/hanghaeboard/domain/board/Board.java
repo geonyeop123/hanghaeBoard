@@ -34,8 +34,8 @@ public class Board extends BaseEntity {
         this.content = content;
     }
 
-    public boolean isCorrectPassword(String password){
-        return this.password.equals(password);
+    public boolean isNotCorrectPassword(String password){
+        return !this.password.equals(password);
     }
 
     @Builder

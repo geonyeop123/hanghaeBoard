@@ -65,7 +65,7 @@ public class BoardService {
     private Board findBoard(Long id, String request) {
         Board findBoard = boardRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("조회된 게시물이 없습니다."));
 
-        if (!findBoard.isCorrectPassword(request)) {
+        if (!findBoard.isNotCorrectPassword(request)) {
             throw new InvalidPasswordException("비밀번호가 올바르지 않습니다.");
         }
         return findBoard;

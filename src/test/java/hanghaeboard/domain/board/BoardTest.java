@@ -8,28 +8,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BoardTest {
 
 
-    @DisplayName("념겨받은 비밀번호와 현재 비밀번호가 일치하는 경우 true를 반환한다.")
-    @Test
-    void isCorrectPassword() {
-        // given
-        Board board = makeBoard("yeop", "password", "title", "content");
-
-
-        // when // then
-        boolean isCorrectPassword = board.isCorrectPassword("password");
-
-        // then
-        assertThat(isCorrectPassword).isTrue();
-    }
-
-    @DisplayName("넘겨받은 비밀번호와 현재 비밀번호가 일치하지 않는 경우 false를 반환한다.")
+    @DisplayName("념겨받은 비밀번호와 현재 비밀번호가 일치하지 않는 경우 true를 반환한다.")
     @Test
     void isNotCorrectPassword() {
         // given
         Board board = makeBoard("yeop", "password", "title", "content");
 
+
         // when // then
-        boolean isCorrectPassword = board.isCorrectPassword("notPassword");
+        boolean isCorrectPassword = board.isNotCorrectPassword("1234");
+
+        // then
+        assertThat(isCorrectPassword).isTrue();
+    }
+
+    @DisplayName("넘겨받은 비밀번호와 현재 비밀번호가 일치하는 경우 false를 반환한다.")
+    @Test
+    void isCorrectPassword() {
+        // given
+        Board board = makeBoard("yeop", "password", "title", "content");
+
+        // when // then
+        boolean isCorrectPassword = board.isNotCorrectPassword("password");
 
         // then
         assertThat(isCorrectPassword).isFalse();
