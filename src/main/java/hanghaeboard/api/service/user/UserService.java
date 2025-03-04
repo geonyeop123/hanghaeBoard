@@ -36,14 +36,14 @@ public class UserService {
 
         User savedUser = userRepository.save(request.toEntity());
 
-        return FindUser.of(savedUser);
+        return FindUser.from(savedUser);
     }
 
     public FindUser findUserById(Long id){
         User findUser = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
 
-        return FindUser.of(findUser);
+        return FindUser.from(findUser);
     }
 
     public LoginResponse login(LoginRequest request) {

@@ -18,7 +18,7 @@ public class FindUser {
         this.username = username;
     }
 
-    public static FindUser of(User user) {
+    public static FindUser from(User user) {
         return new FindUser(user.getId(), user.getUsername());
     }
 }
