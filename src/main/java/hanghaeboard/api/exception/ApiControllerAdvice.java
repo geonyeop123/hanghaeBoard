@@ -2,6 +2,10 @@ package hanghaeboard.api.exception;
 
 import hanghaeboard.api.ApiResponse;
 import hanghaeboard.api.exception.exception.InvalidPasswordException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -52,8 +56,32 @@ public class ApiControllerAdvice {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DuplicateKeyException.class)
-    public ApiResponse<Object> illegalArgumentException(DuplicateKeyException e){
+    public ApiResponse<Object> duplicateKeyException(DuplicateKeyException e){
         return ApiResponse.of(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ApiResponse<Object> expiredJwtException(ExpiredJwtException e){
+        return ApiResponse.of(HttpStatus.UNAUTHORIZED, "JWT 토큰이 만료되었습니다.");
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MalformedJwtException.class)
+    public ApiResponse<Object> malformedJwtException(MalformedJwtException e){
+        return ApiResponse.of(HttpStatus.BAD_REQUEST, "잘못된 JWT 토큰입니다.");
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(SignatureException.class)
+    public ApiResponse<Object> signatureException(SignatureException e){
+        return ApiResponse.of(HttpStatus.FORBIDDEN, "JWT 토큰 서명이 올바르지 않습니다.");
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(JwtException.class)
+    public ApiResponse<Object> jwtException(JwtException e){
+        return ApiResponse.of(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다.");
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

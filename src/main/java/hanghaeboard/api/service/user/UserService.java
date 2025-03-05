@@ -13,6 +13,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -55,7 +56,7 @@ public class UserService {
             throw new InvalidPasswordException("비밀번호가 올바르지 않습니다.");
         }
 
-        String token = jwtUtil.generateToken(request.getUsername());
+        String token = jwtUtil.generateToken(request.getUsername(), LocalDateTime.now());
 
         return LoginResponse.builder().jwtToken(token).build();
     }
