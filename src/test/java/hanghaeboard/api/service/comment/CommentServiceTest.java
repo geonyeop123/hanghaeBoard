@@ -1,9 +1,12 @@
 package hanghaeboard.api.service.comment;
 
 import hanghaeboard.api.controller.comment.request.CreateCommentRequest;
+import hanghaeboard.api.controller.comment.request.UpdateCommentRequest;
 import hanghaeboard.api.service.comment.response.CreateCommentResponse;
+import hanghaeboard.api.service.comment.response.UpdateCommentResponse;
 import hanghaeboard.domain.board.Board;
 import hanghaeboard.domain.board.BoardRepository;
+import hanghaeboard.domain.comment.Comment;
 import hanghaeboard.domain.comment.CommentRepository;
 import hanghaeboard.domain.user.User;
 import hanghaeboard.domain.user.UserRepository;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -23,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class CommentServiceTest {
 
     @Autowired
@@ -102,6 +107,74 @@ class CommentServiceTest {
         assertThatThrownBy(() -> commentService.createComment(createCommentRequest, jwtToken, 1L))
                 .isInstanceOf(EntityNotFoundException.class)
                     .hasMessage("조회된 게시물이 없습니다.");
+    }
+
+    @DisplayName("댓글을 수정할 수 있다.")
+    @Test
+    void modifyComment() {
+        // given
+        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+                .title("title").content("content").build());
+        Comment savedComment = makeComment(user, board, "comment");
+
+        String modifyComment = "modifyComment";
+        UpdateCommentRequest request = UpdateCommentRequest.builder()
+                .content(modifyComment).build();
+
+        // when
+        UpdateCommentResponse updateCommentResponse = commentService.updateComment(request, jwtToken, savedComment.getId());
+
+        // then
+        assertThat(updateCommentResponse.getContent()).isEqualTo(modifyComment);
+    }
+
+    @DisplayName("작성자가 아닌 경우 댓글을 수정할 수 없다.")
+    @Test
+    void modifyComment_notWriter() {
+        // given
+        String jwtToken = jwtUtil.generateToken("another", LocalDateTime.now());
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+                .title("title").content("content").build());
+        Comment savedComment = makeComment(user, board, "comment");
+
+        String modifyComment = "modifyComment";
+        UpdateCommentRequest request = UpdateCommentRequest.builder()
+                .content(modifyComment).build();
+
+        // when // then
+        assertThatThrownBy(() -> commentService.updateComment(request, jwtToken, savedComment.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("댓글의 작성자만 수정할 수 있습니다.");
+    }
+
+    @DisplayName("게시물이 삭제된 경우 댓글을 수정할 수 없다.")
+    @Test
+    void modifyComment_deletedBoard() {
+        // given
+        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+                .title("title").content("content").build());
+
+        board.delete(LocalDateTime.now());
+
+        Comment savedComment = makeComment(user, board, "comment");
+
+        String modifyComment = "modifyComment";
+        UpdateCommentRequest request = UpdateCommentRequest.builder()
+                .content(modifyComment).build();
+
+        // when // then
+        assertThatThrownBy(() -> commentService.updateComment(request, jwtToken, savedComment.getId()))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("삭제된 게시물입니다.");
+    }
+
+    Comment makeComment(User user, Board board, String content){
+        return commentRepository.save(Comment.builder().user(user).board(board).content("comment").build());
     }
 
 }

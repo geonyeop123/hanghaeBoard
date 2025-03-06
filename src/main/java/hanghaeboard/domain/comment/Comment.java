@@ -29,6 +29,14 @@ public class Comment extends BaseEntity {
 
     private String content;
 
+    public void modifyContent(String content) {
+        this.content = content;
+    }
+
+    public boolean isNotWriteUser(String username){
+        return !this.user.getUsername().equals(username);
+    }
+
     @Builder
     private Comment(Long id, Board board, User user, String content) {
         this.id = id;

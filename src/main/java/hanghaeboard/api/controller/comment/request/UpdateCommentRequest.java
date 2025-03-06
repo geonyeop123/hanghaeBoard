@@ -7,13 +7,12 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreateCommentRequest {
-
+public class UpdateCommentRequest {
     @NotBlank(message = "내용은 필수 입력입니다.")
     private String content;
 
     @Builder
-    public CreateCommentRequest(String content) {
+    private UpdateCommentRequest(String content) {
         this.content = content;
     }
 }
