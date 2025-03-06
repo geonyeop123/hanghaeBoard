@@ -7,6 +7,7 @@ import hanghaeboard.domain.board.BoardRepository;
 import hanghaeboard.domain.comment.CommentRepository;
 import hanghaeboard.domain.user.User;
 import hanghaeboard.domain.user.UserRepository;
+import hanghaeboard.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,6 +27,9 @@ class CommentServiceTest {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private UserRepository userRepository;
@@ -48,15 +54,15 @@ class CommentServiceTest {
         // given
 
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
 
         CreateCommentRequest createCommentRequest = CreateCommentRequest.builder()
-                .userId(user.getId())
                 .content("comment").build();
 
         // when
-        CreateCommentResponse response = commentService.createComment(createCommentRequest, board.getId());
+        CreateCommentResponse response = commentService.createComment(createCommentRequest, jwtToken, board.getId());
 
         // then
         assertThat(response).isNotNull();
@@ -69,16 +75,15 @@ class CommentServiceTest {
     @Test
     void createComment_notFoundUser() {
         // given
-
+        String jwtToken = jwtUtil.generateToken("yeop123", LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
 
         CreateCommentRequest createCommentRequest = CreateCommentRequest.builder()
-                .userId(1L)
                 .content("comment").build();
 
         // when // then
-        assertThatThrownBy(() -> commentService.createComment(createCommentRequest, board.getId()))
+        assertThatThrownBy(() -> commentService.createComment(createCommentRequest, jwtToken, board.getId()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("일치하는 회원이 없습니다.");
     }
@@ -88,13 +93,13 @@ class CommentServiceTest {
     void createComment_notFoundBoard() {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken("yeop123", LocalDateTime.now());
 
         CreateCommentRequest createCommentRequest = CreateCommentRequest.builder()
-                .userId(user.getId())
                 .content("comment").build();
 
         // when // then
-        assertThatThrownBy(() -> commentService.createComment(createCommentRequest, 1L))
+        assertThatThrownBy(() -> commentService.createComment(createCommentRequest, jwtToken, 1L))
                 .isInstanceOf(EntityNotFoundException.class)
                     .hasMessage("조회된 게시물이 없습니다.");
     }

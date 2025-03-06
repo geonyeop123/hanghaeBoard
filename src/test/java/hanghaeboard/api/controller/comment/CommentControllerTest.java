@@ -48,15 +48,15 @@ class CommentControllerTest {
                 .build();
 
         CreateCommentRequest request = CreateCommentRequest.builder()
-                .userId(1L)
                 .content("comment")
                 .build();
 
-        when(commentService.createComment(any(), any())).thenReturn(response);
+        when(commentService.createComment(any(), any(), any())).thenReturn(response);
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards/1/comments")
                         .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer token")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -74,38 +74,6 @@ class CommentControllerTest {
         ;
     }
 
-    @DisplayName("댓글을 작성할 때 작성자 정보가 없으면 댓글을 작성할 수 없다.")
-    @Test
-    void createCommentWithoutUser() throws Exception{
-        // given
-        Board board = Board.builder().id(1L).writer("yeop").title("title").content("content").build();
-        LocalDateTime createdDatetime = LocalDateTime.of(2025, 3, 4, 23, 0);
-        CreateCommentResponse response = CreateCommentResponse.builder()
-                .id(1L)
-                .board(board)
-                .content("comment")
-                .createdDatetime(createdDatetime)
-                .build();
-
-        CreateCommentRequest request = CreateCommentRequest.builder()
-                .content("comment")
-                .build();
-
-        when(commentService.createComment(any(), any())).thenReturn(response);
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards/1/comments")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("댓글 작성자 정보가 없습니다."))
-                .andExpect(jsonPath("$.data").isEmpty())
-        ;
-    }
-
     @DisplayName("댓글을 작성할 때 내용이 없으면 댓글을 작성할 수 없다.")
     @Test
     void createCommentWithoutContent() throws Exception{
@@ -120,15 +88,15 @@ class CommentControllerTest {
                 .build();
 
         CreateCommentRequest request = CreateCommentRequest.builder()
-                .userId(1L)
                 .build();
 
-        when(commentService.createComment(any(), any())).thenReturn(response);
+        when(commentService.createComment(any(), any(), any())).thenReturn(response);
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards/1/comments")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest())
