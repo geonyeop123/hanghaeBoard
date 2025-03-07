@@ -5,6 +5,7 @@ import hanghaeboard.api.controller.comment.request.CreateCommentRequest;
 import hanghaeboard.api.controller.comment.request.UpdateCommentRequest;
 import hanghaeboard.api.service.comment.CommentService;
 import hanghaeboard.api.service.comment.response.CreateCommentResponse;
+import hanghaeboard.api.service.comment.response.DeleteCommentResponse;
 import hanghaeboard.api.service.comment.response.UpdateCommentResponse;
 import hanghaeboard.domain.board.Board;
 import org.junit.jupiter.api.DisplayName;
@@ -181,6 +182,30 @@ class CommentControllerTest {
                 .andExpect(jsonPath("$.message").value("내용은 필수 입력입니다."))
                 .andExpect(jsonPath("$.data").isEmpty())
                 ;
+    }
+
+    @DisplayName("댓글을 삭제할 수 있다.")
+    @Test
+    void deleteComment() throws Exception{
+        // given
+        DeleteCommentResponse response = DeleteCommentResponse.builder()
+                .deletedDatetime(LocalDateTime.of(2025, 3, 7, 15, 0))
+                .build();
+
+        when(commentService.deleteComment(any(), any())).thenReturn(response);
+
+        // when // then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/boards/1/comments/1")
+                        .header("Authorization", "Bearer token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isNotEmpty())
+                .andExpect(jsonPath("$.data.deletedDatetime").value("2025-03-07T15:00:00"))
+        ;
     }
 
 }

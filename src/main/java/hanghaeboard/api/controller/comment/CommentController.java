@@ -6,6 +6,7 @@ import hanghaeboard.api.controller.comment.request.CreateCommentRequest;
 import hanghaeboard.api.controller.comment.request.UpdateCommentRequest;
 import hanghaeboard.api.service.comment.CommentService;
 import hanghaeboard.api.service.comment.response.CreateCommentResponse;
+import hanghaeboard.api.service.comment.response.DeleteCommentResponse;
 import hanghaeboard.api.service.comment.response.UpdateCommentResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,15 @@ public class CommentController {
             , @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         String jwtToken = authorizationHeader.substring(7);
         return ApiResponse.ok(commentService.updateComment(request, jwtToken, commentId));
+    }
+
+    @AuthCheck
+    @DeleteMapping("/api/v1/boards/{boardId}/comments/{commentId}")
+    public ApiResponse<DeleteCommentResponse> deleteComment(
+            @PathVariable Long boardId
+            , @PathVariable Long commentId
+            , @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        String jwtToken = authorizationHeader.substring(7);
+        return ApiResponse.ok(commentService.deleteComment(jwtToken, commentId));
     }
 }

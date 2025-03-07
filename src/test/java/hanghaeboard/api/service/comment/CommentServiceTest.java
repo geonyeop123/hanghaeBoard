@@ -3,6 +3,7 @@ package hanghaeboard.api.service.comment;
 import hanghaeboard.api.controller.comment.request.CreateCommentRequest;
 import hanghaeboard.api.controller.comment.request.UpdateCommentRequest;
 import hanghaeboard.api.service.comment.response.CreateCommentResponse;
+import hanghaeboard.api.service.comment.response.DeleteCommentResponse;
 import hanghaeboard.api.service.comment.response.UpdateCommentResponse;
 import hanghaeboard.domain.board.Board;
 import hanghaeboard.domain.board.BoardRepository;
@@ -175,6 +176,39 @@ class CommentServiceTest {
 
     Comment makeComment(User user, Board board, String content){
         return commentRepository.save(Comment.builder().user(user).board(board).content("comment").build());
+    }
+
+    @DisplayName("댓글을 삭제할 수 있다.")
+    @Test
+    void deleteComment() {
+        // given
+        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+                .title("title").content("content").build());
+        Comment savedComment = makeComment(user, board, "comment");
+
+        // when
+        DeleteCommentResponse deleteCommentResponse = commentService.deleteComment(jwtToken, savedComment.getId());
+
+        // then
+        assertThat(deleteCommentResponse.getDeletedDatetime()).isNotNull();
+    }
+
+    @DisplayName("작성자가 아닌 경우 댓글을 삭제할 수 없다.")
+    @Test
+    void deleteComment_notWriteUser() {
+        // given
+        String jwtToken = jwtUtil.generateToken("another", LocalDateTime.now());
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+                .title("title").content("content").build());
+        Comment savedComment = makeComment(user, board, "comment");
+
+        // when //then
+        assertThatThrownBy(() -> commentService.deleteComment(jwtToken, savedComment.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("댓글의 작성자만 삭제할 수 있습니다.");
     }
 
 }

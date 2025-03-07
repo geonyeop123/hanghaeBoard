@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,6 +64,21 @@ class CommentRepositoryTest {
         // then
         Comment modifyComment = commentRepository.findById(savedComment.getId()).orElseThrow();
         assertThat(modifyComment.getContent()).isEqualTo("modifyComment");
+    }
+
+    @DisplayName("댓글을 삭제할 수 있다.")
+    @Test
+    void deleteComment() {
+        // given
+        Comment comment = makeComment("comment");
+        Comment savedComment = commentRepository.save(comment);
+
+        // when
+        savedComment.delete(LocalDateTime.now());
+
+        // then
+        Comment deletedComment = commentRepository.findById(savedComment.getId()).orElseThrow();
+        assertThat(deletedComment.isDeleted()).isTrue();
     }
 
     Comment makeComment(String content){
