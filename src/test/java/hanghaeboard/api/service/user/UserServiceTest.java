@@ -5,6 +5,7 @@ import hanghaeboard.api.controller.user.request.LoginRequest;
 import hanghaeboard.api.exception.exception.InvalidPasswordException;
 import hanghaeboard.api.service.user.response.FindUser;
 import hanghaeboard.api.service.user.response.LoginResponse;
+import hanghaeboard.domain.user.Role;
 import hanghaeboard.domain.user.User;
 import hanghaeboard.domain.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -45,6 +46,26 @@ class UserServiceTest {
         // then
         assertThat(savedUser).isNotNull();
         assertThat(savedUser.getUsername()).isEqualTo("yeop");
+        assertThat(savedUser.getRole()).isEqualTo(Role.USER);
+    }
+
+    @DisplayName("관리자 용으로 회원가입을 할 수 있다.")
+    @Test
+    void join_admin() {
+        // given
+        CreateUserRequest request = CreateUserRequest.builder()
+                .username("yeop")
+                .password("12345678")
+                .role(Role.ADMIN)
+                .build();
+
+        // when
+        FindUser savedUser = userService.join(request);
+
+        // then
+        assertThat(savedUser).isNotNull();
+        assertThat(savedUser.getUsername()).isEqualTo("yeop");
+        assertThat(savedUser.getRole()).isEqualTo(Role.ADMIN);
     }
 
     @DisplayName("동일한 username을 가진 회원이 있다면 해당 username으로 회원가입을 할 수 없다.")

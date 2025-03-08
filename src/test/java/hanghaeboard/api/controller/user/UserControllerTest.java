@@ -7,6 +7,7 @@ import hanghaeboard.api.exception.exception.InvalidPasswordException;
 import hanghaeboard.api.service.user.UserService;
 import hanghaeboard.api.service.user.response.FindUser;
 import hanghaeboard.api.service.user.response.LoginResponse;
+import hanghaeboard.domain.user.Role;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,39 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.userId").value(1))
                 .andExpect(jsonPath("$.data.username").value("yeop"))
                 ;
+    }
+
+    @DisplayName("관리자 계정으로 회원가입을 할 수 있다.")
+    @Test
+    void join_admin()  throws Exception{
+        // given
+        CreateUserRequest request = CreateUserRequest.builder()
+                .username("yeop")
+                .password("12345678")
+                .role(Role.ADMIN)
+                .build();
+
+        FindUser response = FindUser.builder()
+                .userId(1L)
+                .username("yeop")
+                .role(Role.ADMIN)
+                .build();
+
+        when(userService.join(any())).thenReturn(response);
+
+        // when // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/users")
+                        .content(objectMapper.writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isNotEmpty())
+                .andExpect(jsonPath("$.data.userId").value(1))
+                .andExpect(jsonPath("$.data.username").value("yeop"))
+                .andExpect(jsonPath("$.data.role").value("ADMIN"))
+        ;
     }
 
     @DisplayName("회원가입 시 동일한 username으로 회원가입을 할 수 없다.")

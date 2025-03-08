@@ -27,12 +27,19 @@ public class User extends BaseEntity {
 
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @Builder
-    private User(Long id, String username, String password) {
+    private User(Long id, String username, String password, Role role) {
         validation(username, password);
         this.id = id;
         this.username = username;
         this.password = password;
+        if(null == role){
+            role = Role.USER;
+        }
+        this.role = role;
     }
 
     private void validation(String username, String password){

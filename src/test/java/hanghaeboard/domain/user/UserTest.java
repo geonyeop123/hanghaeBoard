@@ -20,6 +20,7 @@ class UserTest {
 
         // then
         assertThat(user).isNotNull();
+        assertThat(user.getRole()).isEqualTo(Role.USER);
     }
 
     @DisplayName("회원을 생성할 때 아이디는 4글자 이상이어야 한다.")
@@ -70,10 +71,26 @@ class UserTest {
                 .hasMessage("비밀번호는 소문자 혹은 대문자 영문과 숫자로만 이루어져야 합니다.");
     }
 
-    private static User makeUser(String username, String password) {
+    private static User makeUser(String username, String password, Role role) {
         return User.builder()
                 .username(username)
-                .password(password).build();
+                .password(password)
+                .role(role)
+                .build();
+    }
+
+    private static User makeUser(String username, String password) {
+        return makeUser(username, password, null);
+    }
+
+    @DisplayName("관리자용 계정을 생성할 수 있다.")
+    @Test
+    void create_adminUser() {
+        // given // when
+        User user = makeUser("yeop", "password", Role.ADMIN);
+
+        // then
+        assertThat(user.getRole()).isEqualTo(Role.ADMIN);
     }
 
 }
