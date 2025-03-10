@@ -40,7 +40,7 @@ class JwtAspectTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("401"))
                 .andExpect(jsonPath("$.message").value("유효하지 않은 JWT 토큰입니다."))
                 .andExpect(jsonPath("$.data").isEmpty())

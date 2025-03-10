@@ -32,7 +32,7 @@ public class UpdateBoardResponse {
     public static UpdateBoardResponse from(Board board) {
         return UpdateBoardResponse.builder()
                 .id(board.getId())
-                .writer(board.getWriter())
+                .writer(board.getUsername())
                 .title(board.getTitle())
                 .content(board.getContent())
                 .createdDatetime(board.getCreatedDatetime())

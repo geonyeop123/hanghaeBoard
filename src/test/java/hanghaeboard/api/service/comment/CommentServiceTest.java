@@ -2,6 +2,7 @@ package hanghaeboard.api.service.comment;
 
 import hanghaeboard.api.controller.comment.request.CreateCommentRequest;
 import hanghaeboard.api.controller.comment.request.UpdateCommentRequest;
+import hanghaeboard.api.exception.exception.AuthorityException;
 import hanghaeboard.api.service.comment.response.CreateCommentResponse;
 import hanghaeboard.api.service.comment.response.DeleteCommentResponse;
 import hanghaeboard.api.service.comment.response.UpdateCommentResponse;
@@ -62,7 +63,7 @@ class CommentServiceTest {
 
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
 
         CreateCommentRequest createCommentRequest = CreateCommentRequest.builder()
@@ -76,24 +77,6 @@ class CommentServiceTest {
         assertThat(response.getBoard().getId()).isEqualTo(board.getId());
         assertThat(response.getContent()).isEqualTo("comment");
 
-    }
-
-    @DisplayName("댓글을 생성할 때 댓글 작성 유저를 찾을 수 없는 경우 댓글을 생성할 수 없다.")
-    @Test
-    void createComment_notFoundUser() {
-        // given
-        User user = User.builder().id(1L).username("yeop123").password("12345678").build();
-        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
-                .title("title").content("content").build());
-
-        CreateCommentRequest createCommentRequest = CreateCommentRequest.builder()
-                .content("comment").build();
-
-        // when // then
-        assertThatThrownBy(() -> commentService.createComment(createCommentRequest, jwtToken, board.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("일치하는 회원이 없습니다.");
     }
 
     @DisplayName("댓글을 생성할 때 게시물을 찾을 수 없는 경우 댓글을 생성할 수 없다.")
@@ -118,7 +101,7 @@ class CommentServiceTest {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
@@ -138,7 +121,7 @@ class CommentServiceTest {
     void modifyComment_admin() {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
@@ -166,7 +149,7 @@ class CommentServiceTest {
     void modifyComment_notWriter() {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
@@ -179,8 +162,8 @@ class CommentServiceTest {
 
         // when // then
         assertThatThrownBy(() -> commentService.updateComment(request, jwtToken, savedComment.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("댓글의 작성자만 수정할 수 있습니다.");
+                .isInstanceOf(AuthorityException.class)
+                .hasMessage("권한이 없습니다.");
     }
 
     @DisplayName("게시물이 삭제된 경우 댓글을 수정할 수 없다.")
@@ -189,7 +172,7 @@ class CommentServiceTest {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
 
         board.delete(LocalDateTime.now());
@@ -216,7 +199,7 @@ class CommentServiceTest {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
@@ -226,13 +209,13 @@ class CommentServiceTest {
         // then
         assertThat(deleteCommentResponse.getDeletedDatetime()).isNotNull();
     }
-    
+
     @DisplayName("어드민 계정은 모든 댓글을 삭제할 수 있다.")
     @Test
     void deleteComment_admin() {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
@@ -254,7 +237,7 @@ class CommentServiceTest {
     void deleteComment_notWriteUser() {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
-        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+        Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
@@ -263,8 +246,8 @@ class CommentServiceTest {
 
         // when //then
         assertThatThrownBy(() -> commentService.deleteComment(jwtToken, savedComment.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("댓글의 작성자만 삭제할 수 있습니다.");
+                .isInstanceOf(AuthorityException.class)
+                .hasMessage("권한이 없습니다.");
     }
 
 }

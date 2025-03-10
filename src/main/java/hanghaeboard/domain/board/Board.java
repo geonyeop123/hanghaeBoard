@@ -2,6 +2,7 @@ package hanghaeboard.domain.board;
 
 
 import hanghaeboard.domain.BaseEntity;
+import hanghaeboard.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,29 +21,31 @@ public class Board extends BaseEntity {
     @Column(name = "board_id")
     private Long id;
 
-    private String writer;
-
-    private String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private String title;
 
     private String content;
 
-    public void changeBoard(String writer, String title, String content){
-        this.writer = writer;
+    public void changeBoard(String title, String content){
         this.title = title;
         this.content = content;
     }
 
-    public boolean isNotCorrectPassword(String password){
-        return !this.password.equals(password);
+    public boolean isNotWriter(String username){
+        return !this.getUser().getUsername().equals(username);
+    }
+
+    public String getUsername(){
+        return this.user.getUsername();
     }
 
     @Builder
-    private Board(Long id, String writer, String password, String title, String content, LocalDateTime createdDatetime) {
+    private Board(Long id, User user, String title, String content, LocalDateTime createdDatetime) {
         this.id = id;
-        this.writer = writer;
-        this.password = password;
+        this.user = user;
         this.title = title;
         this.content = content;
     }

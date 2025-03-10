@@ -1,6 +1,7 @@
 package hanghaeboard.api.controller.board.request;
 
 import hanghaeboard.domain.board.Board;
+import hanghaeboard.domain.user.User;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,13 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateBoardRequest {
 
-
-    @NotBlank(message = "작성자명은 필수 입력입니다.")
-    private String writer;
-
-    @NotBlank(message = "비밀번호는 필수 입력입니다.")
-    private String password;
-
     @NotBlank(message = "제목은 필수 입력입니다.")
     private String title;
 
@@ -24,17 +18,14 @@ public class CreateBoardRequest {
     private String content;
 
     @Builder
-    private CreateBoardRequest(String writer, String password, String title, String content) {
-        this.writer = writer;
-        this.password = password;
+    private CreateBoardRequest(String title, String content) {
         this.title = title;
         this.content = content;
     }
 
-    public Board toEntity() {
+    public Board toEntity(User user) {
         return Board.builder()
-                .writer(writer)
-                .password(password)
+                .user(user)
                 .title(title)
                 .content(content)
                 .build();

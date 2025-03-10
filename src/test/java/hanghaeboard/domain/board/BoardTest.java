@@ -1,5 +1,6 @@
 package hanghaeboard.domain.board;
 
+import hanghaeboard.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -8,50 +9,49 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BoardTest {
 
 
-    @DisplayName("념겨받은 비밀번호와 현재 비밀번호가 일치하지 않는 경우 true를 반환한다.")
+    @DisplayName("작성자와 파라미터가 동일한경우 false를 반환한다.")
     @Test
-    void isNotCorrectPassword() {
+    void isWriter() {
         // given
-        Board board = makeBoard("yeop", "password", "title", "content");
-
-
-        // when // then
-        boolean isCorrectPassword = board.isNotCorrectPassword("1234");
+        User user = User.builder().username("yeop").password("12345678").build();
+        Board board = makeBoard(user, "title", "content");
+        // when
+        boolean isNotWriter = board.isNotWriter("yeop");
 
         // then
-        assertThat(isCorrectPassword).isTrue();
+        assertThat(isNotWriter).isFalse();
     }
 
-    @DisplayName("넘겨받은 비밀번호와 현재 비밀번호가 일치하는 경우 false를 반환한다.")
+    @DisplayName("작성자와 파라미터가 다른 경우 true를 반환한다.")
     @Test
-    void isCorrectPassword() {
+    void isNotWriter() {
         // given
-        Board board = makeBoard("yeop", "password", "title", "content");
-
-        // when // then
-        boolean isCorrectPassword = board.isNotCorrectPassword("password");
+        User user = User.builder().username("yeop").password("12345678").build();
+        Board board = makeBoard(user, "title", "content");
+        // when
+        boolean isNotWriter = board.isNotWriter("another");
 
         // then
-        assertThat(isCorrectPassword).isFalse();
+        assertThat(isNotWriter).isTrue();
     }
 
     @DisplayName("게시물의 내용을 변경할 수 있다.")
     @Test
     void changeBoard() {
         // given
-        Board board = makeBoard("yeop", "password", "title", "content");
+        User user = User.builder().username("yeop").password("12345678").build();
+        Board board = makeBoard(user, "title", "content");
 
         // when
-        board.changeBoard("yeop1", "changeTitle", "changeContent");
+        board.changeBoard("changeTitle", "changeContent");
 
         // then
-        assertThat(board.getWriter()).isEqualTo("yeop1");
         assertThat(board.getTitle()).isEqualTo("changeTitle");
         assertThat(board.getContent()).isEqualTo("changeContent");
     }
 
-    Board makeBoard(String writer, String password, String title, String content) {
-        return Board.builder().writer(writer).password(password).title(title).content(content).build();
+    Board makeBoard(User user, String title, String content) {
+        return Board.builder().user(user).title(title).content(content).build();
     }
 
 }

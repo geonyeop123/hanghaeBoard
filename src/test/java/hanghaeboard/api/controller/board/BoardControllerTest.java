@@ -2,9 +2,7 @@ package hanghaeboard.api.controller.board;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hanghaeboard.api.controller.board.request.CreateBoardRequest;
-import hanghaeboard.api.controller.board.request.DeleteBoardRequest;
 import hanghaeboard.api.controller.board.request.UpdateBoardRequest;
-import hanghaeboard.api.exception.exception.InvalidPasswordException;
 import hanghaeboard.api.service.board.BoardService;
 import hanghaeboard.api.service.board.response.CreateBoardResponse;
 import hanghaeboard.api.service.board.response.DeleteBoardResponse;
@@ -73,8 +71,6 @@ class BoardControllerTest {
     void createBoard() throws Exception{
         // given
         CreateBoardRequest request = CreateBoardRequest.builder()
-                .writer("yeop")
-                .password("1234")
                 .title("title")
                 .content("content")
                 .build();
@@ -83,12 +79,13 @@ class BoardControllerTest {
 
         CreateBoardResponse response = CreateBoardResponse.builder().id(1L).writer("yeop").title("title").content("content").createdDatetime(createdDatetime).build();
 
-        when(boardService.createBoard(any())).thenReturn(response);
+        when(boardService.createBoard(any(), any())).thenReturn(response);
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards")
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -103,57 +100,11 @@ class BoardControllerTest {
                 ;
     }
 
-    @DisplayName("작성자 없이 게시물을 생성할 수 없다.")
-    @Test
-    void createBoardWithoutWriter() throws Exception{
-        // given
-        CreateBoardRequest request = CreateBoardRequest.builder()
-                .password("1234")
-                .title("title")
-                .content("content")
-                .build();
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("작성자명은 필수 입력입니다."))
-                ;
-    }
-
-    @DisplayName("비밀번호 없이 게시물을 생성할 수 없다.")
-    @Test
-    void createBoardWithoutPassword() throws Exception{
-        // given
-        CreateBoardRequest request = CreateBoardRequest.builder()
-                .writer("yeop")
-                .title("title")
-                .content("content")
-                .build();
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("비밀번호는 필수 입력입니다."))
-        ;
-    }
-
     @DisplayName("제목 없이 게시물을 생성할 수 없다.")
     @Test
     void createBoardWithoutTitle() throws Exception{
         // given
         CreateBoardRequest request = CreateBoardRequest.builder()
-                .writer("yeop")
-                .password("1234")
                 .content("content")
                 .build();
 
@@ -161,6 +112,7 @@ class BoardControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -174,8 +126,6 @@ class BoardControllerTest {
     void createBoardWithoutContent() throws Exception{
         // given
         CreateBoardRequest request = CreateBoardRequest.builder()
-                .writer("yeop")
-                .password("1234")
                 .title("title")
                 .build();
 
@@ -183,6 +133,7 @@ class BoardControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/boards")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -240,8 +191,6 @@ class BoardControllerTest {
     void modifyBoard() throws Exception{
         // given
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("writer")
                 .title("title")
                 .content("content")
                 .build();
@@ -255,12 +204,13 @@ class BoardControllerTest {
                 .lastModifiedDatetime(LocalDateTime.of(2025, 2, 21, 19, 0))
                 .build();
 
-        when(boardService.updateBoard(any(), any())).thenReturn(response);
+        when(boardService.updateBoard(any(), any(), any())).thenReturn(response);
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/boards/1")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -276,81 +226,11 @@ class BoardControllerTest {
                 ;
     }
 
-    @DisplayName("게시물 수정 요청 시 비밀번호가 없으면 수정할 수 없다.")
-    @Test
-    void modifyBoardWithoutPassword() throws Exception{
-        // given
-        UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .writer("writer")
-                .title("title")
-                .content("content")
-                .build();
-
-        UpdateBoardResponse response = UpdateBoardResponse.builder()
-                .id(1L)
-                .writer("writer")
-                .title("title")
-                .content("content")
-                .createdDatetime(LocalDateTime.of(2025, 2, 21, 14, 0))
-                .lastModifiedDatetime(LocalDateTime.of(2025, 2, 21, 19, 0))
-                .build();
-
-        when(boardService.updateBoard(any(), any())).thenReturn(response);
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/boards/1")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("비밀번호는 필수 입력입니다."))
-                .andExpect(jsonPath("$.data").isEmpty())
-        ;
-    }
-
-    @DisplayName("게시물 수정 요청 시 작성자가 없으면 수정할 수 없다.")
-    @Test
-    void modifyBoardWithoutWriter() throws Exception{
-        // given
-        UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .title("title")
-                .content("content")
-                .build();
-
-        UpdateBoardResponse response = UpdateBoardResponse.builder()
-                .id(1L)
-                .writer("writer")
-                .title("title")
-                .content("content")
-                .createdDatetime(LocalDateTime.of(2025, 2, 21, 14, 0))
-                .lastModifiedDatetime(LocalDateTime.of(2025, 2, 21, 19, 0))
-                .build();
-
-        when(boardService.updateBoard(any(), any())).thenReturn(response);
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/boards/1")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("작성자명은 필수 입력입니다."))
-                .andExpect(jsonPath("$.data").isEmpty())
-        ;
-    }
-
     @DisplayName("게시물 수정 요청 시 제목이 없으면 수정할 수 없다.")
     @Test
     void modifyBoardWithoutTitle() throws Exception{
         // given
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("writer")
                 .content("content")
                 .build();
 
@@ -363,12 +243,13 @@ class BoardControllerTest {
                 .lastModifiedDatetime(LocalDateTime.of(2025, 2, 21, 19, 0))
                 .build();
 
-        when(boardService.updateBoard(any(), any())).thenReturn(response);
+        when(boardService.updateBoard(any(), any(), any())).thenReturn(response);
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/boards/1")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -383,8 +264,6 @@ class BoardControllerTest {
     void modifyBoardWithoutContent() throws Exception{
         // given
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("writer")
                 .title("title")
                 .build();
 
@@ -397,12 +276,13 @@ class BoardControllerTest {
                 .lastModifiedDatetime(LocalDateTime.of(2025, 2, 21, 19, 0))
                 .build();
 
-        when(boardService.updateBoard(any(), any())).thenReturn(response);
+        when(boardService.updateBoard(any(), any(), any())).thenReturn(response);
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/boards/1")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -417,49 +297,22 @@ class BoardControllerTest {
     void modifyBoard_notFound() throws Exception{
         // given
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("writer")
                 .title("title")
                 .content("content")
                 .build();
 
-        when(boardService.updateBoard(any(), any())).thenThrow(new EntityNotFoundException("조회된 게시물이 없습니다."));
+        when(boardService.updateBoard(any(), any(), any())).thenThrow(new EntityNotFoundException("조회된 게시물이 없습니다."));
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/boards/1")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message").value("조회된 게시물이 없습니다."))
-                .andExpect(jsonPath("$.data").isEmpty())
-        ;
-    }
-
-    @DisplayName("게시물 수정 요청 시 비밀번호가 다른 경우 수정할 수 없다.")
-    @Test
-    void modifyBoard_notInvalidPassword() throws Exception{
-        // given
-        UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("writer")
-                .title("title")
-                .content("content")
-                .build();
-
-        when(boardService.updateBoard(any(), any())).thenThrow(new InvalidPasswordException("비밀번호가 올바르지 않습니다."));
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/boards/1")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("비밀번호가 올바르지 않습니다."))
                 .andExpect(jsonPath("$.data").isEmpty())
         ;
     }
@@ -468,8 +321,6 @@ class BoardControllerTest {
     @Test
     void deleteBoard() throws Exception{
         // given
-        DeleteBoardRequest request = DeleteBoardRequest.builder().password("1234").build();
-
         LocalDateTime deletedDatetime = LocalDateTime.of(2025, 2, 24, 14, 40);
         DeleteBoardResponse response = DeleteBoardResponse.builder().deletedDatetime(deletedDatetime).build();
 
@@ -478,8 +329,8 @@ class BoardControllerTest {
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/boards/1")
-                        .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -487,73 +338,6 @@ class BoardControllerTest {
                 .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data").isNotEmpty())
                 .andExpect(jsonPath("$.data.deletedDatetime").value("2025-02-24T14:40:00"))
-        ;
-    }
-
-    @DisplayName("비밀번호 없이 게시물을 삭제할 수 없다.")
-    @Test
-    void deleteBoardWithoutPassword() throws Exception{
-        // given
-        DeleteBoardRequest request = DeleteBoardRequest.builder().build();
-
-        LocalDateTime deletedDatetime = LocalDateTime.of(2025, 2, 24, 14, 40);
-        DeleteBoardResponse response = DeleteBoardResponse.builder().deletedDatetime(deletedDatetime).build();
-
-
-        when(boardService.deleteBoard(any(), any())).thenReturn(response);
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/boards/1")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("비밀번호는 필수 입력입니다."))
-                .andExpect(jsonPath("$.data").isEmpty())
-        ;
-    }
-
-    @DisplayName("존재하지 않는 게시물인 경우 게시물을 삭제할 수 없다.")
-    @Test
-    void deleteBoard_notFoundBoard() throws Exception{
-        // given
-        DeleteBoardRequest request = DeleteBoardRequest.builder().password("1234").build();
-
-        when(boardService.deleteBoard(any(), any())).thenThrow(new EntityNotFoundException("조회된 게시물이 없습니다."));
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/boards/1")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("404"))
-                .andExpect(jsonPath("$.message").value("조회된 게시물이 없습니다."))
-                .andExpect(jsonPath("$.data").isEmpty())
-        ;
-    }
-
-    @DisplayName("비밀번호가 틀린 경우 게시물을 삭제할 수 없다.")
-    @Test
-    void deleteBoard_notInvalidPassword() throws Exception{
-        // given
-        DeleteBoardRequest request = DeleteBoardRequest.builder().password("1234").build();
-
-        when(boardService.deleteBoard(any(), any())).thenThrow(new InvalidPasswordException("비밀번호가 올바르지 않습니다."));
-
-        // when // then
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/boards/1")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("비밀번호가 올바르지 않습니다."))
-                .andExpect(jsonPath("$.data").isEmpty())
         ;
     }
 

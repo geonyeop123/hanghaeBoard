@@ -1,8 +1,8 @@
 package hanghaeboard.api.controller.board;
 
+import hanghaeboard.annotation.AuthCheck;
 import hanghaeboard.api.ApiResponse;
 import hanghaeboard.api.controller.board.request.CreateBoardRequest;
-import hanghaeboard.api.controller.board.request.DeleteBoardRequest;
 import hanghaeboard.api.controller.board.request.UpdateBoardRequest;
 import hanghaeboard.api.service.board.BoardService;
 import hanghaeboard.api.service.board.response.CreateBoardResponse;
@@ -28,26 +28,38 @@ public class BoardController {
         return ApiResponse.ok(boardService.findAllBoard());
     }
 
+    @AuthCheck
     @PostMapping("/api/v1/boards")
-    public ApiResponse<CreateBoardResponse> createBoard(@Valid @RequestBody CreateBoardRequest request) throws Exception{
-        log.info("createBoard request: {}", request);
+    public ApiResponse<CreateBoardResponse> createBoard(
+            @Valid @RequestBody CreateBoardRequest request
+            , @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        String jwtToken = authorizationHeader.substring(7);
 
-        return ApiResponse.ok(boardService.createBoard(request));
+        return ApiResponse.ok(boardService.createBoard(request, jwtToken));
     }
 
     @GetMapping("/api/v1/boards/{id}")
-    public ApiResponse<FindBoardResponse> findBoardById(@PathVariable Long id) throws Exception{
+    public ApiResponse<FindBoardResponse> findBoardById(@PathVariable Long id){
         return ApiResponse.ok(boardService.findBoardById(id));
     }
 
+    @AuthCheck
     @PutMapping("/api/v1/boards/{id}")
-    public ApiResponse<UpdateBoardResponse> updateBoard(@PathVariable Long id, @Valid @RequestBody UpdateBoardRequest request) throws Exception{
-        return ApiResponse.ok(boardService.updateBoard(id, request));
+    public ApiResponse<UpdateBoardResponse> updateBoard(
+            @PathVariable Long id
+            , @Valid @RequestBody UpdateBoardRequest request
+            , @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        String jwtToken = authorizationHeader.substring(7);
+        return ApiResponse.ok(boardService.updateBoard(request, id, jwtToken));
     }
 
+    @AuthCheck
     @DeleteMapping("/api/v1/boards/{id}")
-    public ApiResponse<DeleteBoardResponse> deleteBoard(@PathVariable Long id, @Valid @RequestBody DeleteBoardRequest request) throws Exception {
-        return ApiResponse.ok(boardService.deleteBoard(id, request));
+    public ApiResponse<DeleteBoardResponse> deleteBoard(
+            @PathVariable Long id
+            , @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        String jwtToken = authorizationHeader.substring(7);
+        return ApiResponse.ok(boardService.deleteBoard(id, jwtToken));
     }
 
 }

@@ -67,7 +67,8 @@ class CommentTest {
         assertThat(comment.isDeleted()).isTrue();
     }
 
-    Comment makeComment(User user, String content){Board board = Board.builder().id(1L).writer("yeop").password("12345678")
+    Comment makeComment(User user, String content){
+        Board board = Board.builder().id(1L).user(user)
                 .title("title").content("content").build();
 
         return Comment.builder().user(user).board(board).content(content).build();

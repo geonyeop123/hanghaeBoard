@@ -29,7 +29,7 @@ public class CreateBoardResponse {
     public static CreateBoardResponse from(Board board) {
         return CreateBoardResponse.builder()
                 .id(board.getId())
-                .writer(board.getWriter())
+                .writer(board.getUser().getUsername())
                 .title(board.getTitle())
                 .content(board.getContent())
                 .createdDatetime(board.getCreatedDatetime())

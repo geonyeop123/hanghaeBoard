@@ -1,6 +1,7 @@
 package hanghaeboard.api.exception;
 
 import hanghaeboard.api.ApiResponse;
+import hanghaeboard.api.exception.exception.AuthorityException;
 import hanghaeboard.api.exception.exception.InvalidPasswordException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -82,6 +83,12 @@ public class ApiControllerAdvice {
     @ExceptionHandler(JwtException.class)
     public ApiResponse<Object> jwtException(JwtException e){
         return ApiResponse.of(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다.");
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AuthorityException.class)
+    public ApiResponse<Object> authorityException(AuthorityException e){
+        return ApiResponse.of(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

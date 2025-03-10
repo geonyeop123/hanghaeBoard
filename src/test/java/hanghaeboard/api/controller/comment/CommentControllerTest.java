@@ -8,6 +8,7 @@ import hanghaeboard.api.service.comment.response.CreateCommentResponse;
 import hanghaeboard.api.service.comment.response.DeleteCommentResponse;
 import hanghaeboard.api.service.comment.response.UpdateCommentResponse;
 import hanghaeboard.domain.board.Board;
+import hanghaeboard.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,11 @@ class CommentControllerTest {
     @Test
     void createComment() throws Exception{
         // given
-        Board board = Board.builder().id(1L).writer("yeop").title("title").content("content").build();
+        Board board = Board.builder().id(1L)
+                .user(User.builder().username("yeop").password("12345678").build())
+                .title("title")
+                .content("content")
+                .build();
         LocalDateTime createdDatetime = LocalDateTime.of(2025, 3, 4, 23, 0);
         CreateCommentResponse response = CreateCommentResponse.builder()
                 .id(1L)
@@ -81,7 +86,11 @@ class CommentControllerTest {
     @Test
     void createCommentWithoutContent() throws Exception{
         // given
-        Board board = Board.builder().id(1L).writer("yeop").title("title").content("content").build();
+        Board board = Board.builder().id(1L)
+                .user(User.builder().username("yeop").password("12345678").build())
+                .title("title")
+                .content("content")
+                .build();
         LocalDateTime createdDatetime = LocalDateTime.of(2025, 3, 4, 23, 0);
         CreateCommentResponse response = CreateCommentResponse.builder()
                 .id(1L)
@@ -113,7 +122,11 @@ class CommentControllerTest {
     @Test
     void updateComment() throws Exception{
         // given
-        Board board = Board.builder().id(1L).writer("yeop").title("title").content("content").build();
+        Board board = Board.builder().id(1L)
+                .user(User.builder().username("yeop").password("12345678").build())
+                .title("title")
+                .content("content")
+                .build();
         LocalDateTime createdDatetime = LocalDateTime.of(2025, 3, 4, 23, 0);
         UpdateCommentResponse response = UpdateCommentResponse.builder()
                 .id(1L)
@@ -155,7 +168,11 @@ class CommentControllerTest {
     @Test
     void updateCommentWithoutContent() throws Exception{
         // given
-        Board board = Board.builder().id(1L).writer("yeop").title("title").content("content").build();
+        Board board = Board.builder().id(1L)
+                .user(User.builder().username("yeop").password("12345678").build())
+                .title("title")
+                .content("content")
+                .build();
         LocalDateTime createdDatetime = LocalDateTime.of(2025, 3, 4, 23, 0);
         UpdateCommentResponse response = UpdateCommentResponse.builder()
                 .id(1L)

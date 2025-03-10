@@ -2,6 +2,7 @@ package hanghaeboard.api.service.comment;
 
 import hanghaeboard.api.controller.comment.request.CreateCommentRequest;
 import hanghaeboard.api.controller.comment.request.UpdateCommentRequest;
+import hanghaeboard.api.exception.exception.AuthorityException;
 import hanghaeboard.api.service.comment.response.CreateCommentResponse;
 import hanghaeboard.api.service.comment.response.DeleteCommentResponse;
 import hanghaeboard.api.service.comment.response.UpdateCommentResponse;
@@ -48,21 +49,27 @@ public class CommentService {
 
     @Transactional
     public UpdateCommentResponse updateComment(UpdateCommentRequest request, String jwtToken, Long commentId){
-        String username = jwtUtil.getUsername(jwtToken);
-        Role role = jwtUtil.getRole(jwtToken);
 
         Comment comment = findCommentById(commentId);
 
-        if(Role.ADMIN != role && comment.isNotWriteUser(username)){
-            throw new IllegalArgumentException("댓글의 작성자만 수정할 수 있습니다.");
-        }
-        else if(comment.getBoard().isDeleted()){
+        validAuthority(comment, jwtToken);
+
+        if(comment.getBoard().isDeleted()){
             throw new EntityNotFoundException("삭제된 게시물입니다.");
         }
 
         comment.modifyContent(request.getContent());
 
         return UpdateCommentResponse.from(comment);
+    }
+
+    private void validAuthority(Comment comment, String jwtToken) {
+        String username = jwtUtil.getUsername(jwtToken);
+        Role role = jwtUtil.getRole(jwtToken);
+
+        if(Role.ADMIN != role && comment.isNotWriteUser(username)){
+            throw new AuthorityException("권한이 없습니다.");
+        }
     }
 
     private Comment findCommentById(Long commentId) {
@@ -72,17 +79,15 @@ public class CommentService {
 
     @Transactional
     public DeleteCommentResponse deleteComment(String jwtToken, Long commentId){
-        String username = jwtUtil.getUsername(jwtToken);
-        Role role = jwtUtil.getRole(jwtToken);
 
         Comment comment = findCommentById(commentId);
         LocalDateTime deletedDateTime = LocalDateTime.now();
 
-        if(Role.ADMIN != role && comment.isNotWriteUser(username)){
-            throw new IllegalArgumentException("댓글의 작성자만 삭제할 수 있습니다.");
-        }
+        validAuthority(comment, jwtToken);
 
-        comment.delete(deletedDateTime);
+        if(!comment.isDeleted()){
+            comment.delete(deletedDateTime);
+        }
 
         return DeleteCommentResponse.from(comment);
     }

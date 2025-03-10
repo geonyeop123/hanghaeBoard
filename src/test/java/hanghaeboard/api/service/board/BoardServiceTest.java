@@ -1,14 +1,16 @@
 package hanghaeboard.api.service.board;
 
 import hanghaeboard.api.controller.board.request.CreateBoardRequest;
-import hanghaeboard.api.controller.board.request.DeleteBoardRequest;
 import hanghaeboard.api.controller.board.request.UpdateBoardRequest;
-import hanghaeboard.api.exception.exception.InvalidPasswordException;
+import hanghaeboard.api.exception.exception.AuthorityException;
 import hanghaeboard.api.service.board.response.DeleteBoardResponse;
 import hanghaeboard.api.service.board.response.FindBoardResponse;
 import hanghaeboard.api.service.board.response.UpdateBoardResponse;
 import hanghaeboard.domain.board.Board;
 import hanghaeboard.domain.board.BoardRepository;
+import hanghaeboard.domain.user.User;
+import hanghaeboard.domain.user.UserRepository;
+import hanghaeboard.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
@@ -34,31 +36,36 @@ class BoardServiceTest {
     @Autowired
     private BoardRepository boardRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @AfterEach
     void tearDown() {
         boardRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
     }
 
     @DisplayName("게시물을 생성할 수 있다.")
     @Test
     void createBoard() {
         // given
-
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
         CreateBoardRequest request = CreateBoardRequest.builder()
-                .writer("yeop")
-                .password("1234")
                 .title("title")
                 .content("content")
                 .build();
-
+        String token = jwtUtil.generateToken(user, LocalDateTime.now());
         // when
-        boardService.createBoard(request);
+        boardService.createBoard(request, token);
 
         // then
         List<Board> all = boardRepository.findAll();
         assertThat(all).hasSize(1);
-        assertThat(all).extracting("writer", "password", "title", "content")
-                .containsExactlyInAnyOrder(tuple("yeop", "1234", "title", "content"));
+        assertThat(all).extracting("user.username", "title", "content")
+                .containsExactlyInAnyOrder(tuple("yeop", "title", "content"));
 
     }
 
@@ -66,11 +73,12 @@ class BoardServiceTest {
     @Test
     void findAllBoard() throws Exception{
         // given
-        boardRepository.save(makeBoard("yeop", "1234", "title1", "content1"));
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        boardRepository.save(makeBoard(user, "title1", "content1"));
         Thread.sleep(10);
-        boardRepository.save(makeBoard("yeop", "1234", "title2", "content2"));
+        boardRepository.save(makeBoard(user, "title2", "content2"));
         Thread.sleep(10);
-        boardRepository.save(makeBoard("yeop", "1234", "title3", "content3"));
+        boardRepository.save(makeBoard(user, "title3", "content3"));
         Thread.sleep(10);
 
         // when
@@ -99,7 +107,8 @@ class BoardServiceTest {
     @Test
     void findBoardById() {
         // given
-        Board saved = boardRepository.save(makeBoard("yeop", "1234", "title2", "content2"));
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board saved = boardRepository.save(makeBoard(user, "title2", "content2"));
         Long id = saved.getId();
         // when
         FindBoardResponse boardById = boardService.findBoardById(id);
@@ -121,15 +130,16 @@ class BoardServiceTest {
         assertThatThrownBy(() -> boardService.findBoardById(id)).isInstanceOf(EntityNotFoundException.class).hasMessage("조회된 게시물이 없습니다.");
     }
 
-    private static Board makeBoard(String writer, String password, String title, String content) {
-        return Board.builder().title(title).content(content).writer(writer).password(password).build();
+    private static Board makeBoard(User user, String title, String content) {
+        return Board.builder().title(title).content(content).user(user).build();
     }
 
     @DisplayName("id로 게시물을 조회할 때 삭제된 게시물인 경우 조회할 수 없다.")
     @Test
     void findBoardById_deletedBoard() {
         // given
-        Board board = makeBoard("yeop", "1234", "title2", "content2");
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = makeBoard(user, "title2", "content2");
         LocalDateTime now = LocalDateTime.now();
         board.delete(now);
         Board saved = boardRepository.save(board);
@@ -143,21 +153,23 @@ class BoardServiceTest {
     @Test
     void modifyBoard() {
         // given
-        Board saved = boardRepository.save(makeBoard("yeop", "1234", "title", "content"));
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
+
+        Board saved = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = saved.getId();
+
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("yeop1")
                 .title("changeTitle")
                 .content("changeContent")
                 .build();
 
         // when
-        UpdateBoardResponse updateBoardResponse = boardService.updateBoard(id, request);
+        UpdateBoardResponse updateBoardResponse = boardService.updateBoard(request, id, jwtToken);
 
         // then
         assertThat(updateBoardResponse).isNotNull();
-        assertThat(updateBoardResponse.getWriter()).isEqualTo("yeop1");
+        assertThat(updateBoardResponse.getWriter()).isEqualTo("yeop");
         assertThat(updateBoardResponse.getTitle()).isEqualTo("changeTitle");
         assertThat(updateBoardResponse.getContent()).isEqualTo("changeContent");
     }
@@ -166,44 +178,48 @@ class BoardServiceTest {
     @Test
     void modityBoard_notFoundBoard() {
         // given
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("yeop1")
                 .title("changeTitle")
                 .content("changeContent")
                 .build();
 
+
         // when // then
-        assertThatThrownBy(() -> boardService.updateBoard(1L, request))
+        assertThatThrownBy(() -> boardService.updateBoard(request, 1L, jwtToken))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("조회된 게시물이 없습니다.");
     }
 
-    @DisplayName("게시물을 수정할 때 비밀번호가 다른 경우 수정할 수 없다.")
+    @DisplayName("게시물을 수정할 때 작성자가 아닌 경우 수정할 수 없다.")
     @Test
     void modifyBoard_isNotCorrectPassword() {
         // given
-        Board saved = boardRepository.save(makeBoard("yeop", "1234", "title", "content"));
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board saved = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = saved.getId();
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("notPassword")
-                .writer("yeop1")
                 .title("changeTitle")
                 .content("changeContent")
                 .build();
 
-        // when // then
-        assertThatThrownBy(() -> boardService.updateBoard(id, request))
-                .isInstanceOf(InvalidPasswordException.class)
-                .hasMessage("비밀번호가 올바르지 않습니다.");
+        User anotherUser = User.builder().username("another").password("12345678").build();
+        String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
+        // when // then
+        assertThatThrownBy(() -> boardService.updateBoard(request, id, jwtToken))
+                .isInstanceOf(AuthorityException.class)
+                .hasMessage("권한이 없습니다.");
     }
 
     @DisplayName("게시물을 수정할 때 삭제된 게시물은 수정할 수 없다.")
     @Test
     void modifyBoard_isDeletedBoard() {
         // given
-        Board board = makeBoard("yeop", "1234", "title", "content");
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
+        Board board = makeBoard(user, "title", "content");
         LocalDateTime deletedDatetime = LocalDateTime.now();
         board.delete(deletedDatetime);
 
@@ -211,14 +227,12 @@ class BoardServiceTest {
 
         Long id = saved.getId();
         UpdateBoardRequest request = UpdateBoardRequest.builder()
-                .password("1234")
-                .writer("yeop1")
                 .title("changeTitle")
                 .content("changeContent")
                 .build();
 
         // when // then
-        assertThatThrownBy(() -> boardService.updateBoard(id, request))
+        assertThatThrownBy(() -> boardService.updateBoard(request, id, jwtToken))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("삭제된 게시물입니다.");
 
@@ -228,15 +242,13 @@ class BoardServiceTest {
     @Test
     void deleteBoard() {
         // given
-        Board saved = boardRepository.save(makeBoard("yeop", "1234", "title", "content"));
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
+        Board saved = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = saved.getId();
 
-        DeleteBoardRequest request = DeleteBoardRequest.builder()
-                .password("1234")
-                .build();
-
         // when
-        DeleteBoardResponse deleteBoardResponse = boardService.deleteBoard(id, request);
+        DeleteBoardResponse deleteBoardResponse = boardService.deleteBoard(id, jwtToken);
 
         // then
         assertThat(deleteBoardResponse).isNotNull();
@@ -246,19 +258,17 @@ class BoardServiceTest {
     @Test
     void deleteBoard_already() throws Exception{
         // given
-        Board saved = boardRepository.save(makeBoard("yeop", "1234", "title", "content"));
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
+        Board board = makeBoard(user, "title", "content");
+        LocalDateTime deletedDatetime = LocalDateTime.of(2025, 3, 10, 19, 40);
+        board.delete(deletedDatetime);
+        Board saved = boardRepository.save(board);
         Long id = saved.getId();
 
-        DeleteBoardRequest request = DeleteBoardRequest.builder()
-                .password("1234")
-                .build();
-
-        DeleteBoardResponse deleteBoardResponse = boardService.deleteBoard(id, request);
-        LocalDateTime deletedDatetime = deleteBoardResponse.getDeletedDatetime();
         Thread.sleep(10);
-
         // when
-        DeleteBoardResponse alreadyDeleteResponse = boardService.deleteBoard(id, request);
+        DeleteBoardResponse alreadyDeleteResponse = boardService.deleteBoard(id, jwtToken);
 
         // then
         assertThat(deletedDatetime).isEqualTo(alreadyDeleteResponse.getDeletedDatetime());
@@ -268,32 +278,30 @@ class BoardServiceTest {
     @Test
     void deleteBoard_notFoundBoard() {
         // given
-        DeleteBoardRequest request = DeleteBoardRequest.builder()
-                .password("1234")
-                .build();
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
 
         // when // then
-        assertThatThrownBy(() -> boardService.deleteBoard(1L, request))
+        assertThatThrownBy(() -> boardService.deleteBoard(1L, jwtToken))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("조회된 게시물이 없습니다.");
     }
 
-    @DisplayName("게시물을 삭제할 때 비밀번호가 다른 경우 삭제할 수 없다.")
+    @DisplayName("게시물을 삭제할 때 작성자가 아닌 경우 삭제할 수 없다.")
     @Test
-    void deleteBoard_isNotCorrectPassword() {
+    void deleteBoard_isNotWriter() {
         // given
-        Board saved = boardRepository.save(makeBoard("yeop", "1234", "title", "content"));
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board saved = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = saved.getId();
 
-        DeleteBoardRequest request = DeleteBoardRequest.builder()
-                .password("password")
-                .build();
+        User anotherUser = User.builder().username("another").password("12345678").build();
+        String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
         // when // then
-        assertThatThrownBy(() -> boardService.deleteBoard(id, request))
-                .isInstanceOf(InvalidPasswordException.class)
-                .hasMessage("비밀번호가 올바르지 않습니다.");
-
+        assertThatThrownBy(() -> boardService.deleteBoard(id, jwtToken))
+                .isInstanceOf(AuthorityException.class)
+                .hasMessage("권한이 없습니다.");
     }
 
 }

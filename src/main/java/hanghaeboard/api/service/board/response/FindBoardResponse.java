@@ -31,7 +31,7 @@ public class FindBoardResponse {
     public static FindBoardResponse from(Board board) {
         return FindBoardResponse.builder()
                 .id(board.getId())
-                .writer(board.getWriter())
+                .writer(board.getUsername())
                 .title(board.getTitle())
                 .content(board.getContent())
                 .createdDatetime(board.getCreatedDatetime())
