@@ -56,7 +56,7 @@ public class UserService {
             throw new InvalidPasswordException("비밀번호가 올바르지 않습니다.");
         }
 
-        String token = jwtUtil.generateToken(request.getUsername(), LocalDateTime.now());
+        String token = jwtUtil.generateToken(findUser, LocalDateTime.now());
 
         return LoginResponse.builder().jwtToken(token).build();
     }

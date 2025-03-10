@@ -60,7 +60,7 @@ class CommentServiceTest {
         // given
 
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
-        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
 
@@ -81,7 +81,8 @@ class CommentServiceTest {
     @Test
     void createComment_notFoundUser() {
         // given
-        String jwtToken = jwtUtil.generateToken("yeop123", LocalDateTime.now());
+        User user = User.builder().id(1L).username("yeop123").password("12345678").build();
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
 
@@ -99,7 +100,7 @@ class CommentServiceTest {
     void createComment_notFoundBoard() {
         // given
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
-        String jwtToken = jwtUtil.generateToken("yeop123", LocalDateTime.now());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
 
         CreateCommentRequest createCommentRequest = CreateCommentRequest.builder()
                 .content("comment").build();
@@ -114,8 +115,8 @@ class CommentServiceTest {
     @Test
     void modifyComment() {
         // given
-        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
@@ -135,11 +136,13 @@ class CommentServiceTest {
     @Test
     void modifyComment_notWriter() {
         // given
-        String jwtToken = jwtUtil.generateToken("another", LocalDateTime.now());
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
+
+        User anotherUser = User.builder().id(1L).username("another").password("12345678").build();
+        String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
         String modifyComment = "modifyComment";
         UpdateCommentRequest request = UpdateCommentRequest.builder()
@@ -155,8 +158,8 @@ class CommentServiceTest {
     @Test
     void modifyComment_deletedBoard() {
         // given
-        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
 
@@ -182,8 +185,8 @@ class CommentServiceTest {
     @Test
     void deleteComment() {
         // given
-        String jwtToken = jwtUtil.generateToken("yeop", LocalDateTime.now());
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
@@ -199,11 +202,13 @@ class CommentServiceTest {
     @Test
     void deleteComment_notWriteUser() {
         // given
-        String jwtToken = jwtUtil.generateToken("another", LocalDateTime.now());
         User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
         Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
+
+        User anotherUser = User.builder().username("another").password("12345678").build();
+        String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
         // when //then
         assertThatThrownBy(() -> commentService.deleteComment(jwtToken, savedComment.getId()))

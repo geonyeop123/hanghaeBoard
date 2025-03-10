@@ -1,5 +1,6 @@
 package hanghaeboard.util;
 
+import hanghaeboard.domain.user.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,13 +18,14 @@ public class JwtUtil {
     @Value("${spring.jwt.expiration-time}")
     private long EXPIRATION_TIME;
 
-    public String generateToken(String username, LocalDateTime now) {
+    public String generateToken(User user, LocalDateTime now) {
 
         return Jwts.builder()
                 .header().add("typ", "JWT")
                 .and()
                 .issuer("superAdmin")
-                .subject(username)
+                .subject(user.getUsername())
+                .claim("role", user.getRole())
                 .issuedAt(convertToDate(now))
                 .expiration(convertToDate(now.plusSeconds(EXPIRATION_TIME)))
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
