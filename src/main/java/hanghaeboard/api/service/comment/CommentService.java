@@ -9,6 +9,7 @@ import hanghaeboard.domain.board.Board;
 import hanghaeboard.domain.board.BoardRepository;
 import hanghaeboard.domain.comment.Comment;
 import hanghaeboard.domain.comment.CommentRepository;
+import hanghaeboard.domain.user.Role;
 import hanghaeboard.domain.user.User;
 import hanghaeboard.domain.user.UserRepository;
 import hanghaeboard.util.JwtUtil;
@@ -48,10 +49,11 @@ public class CommentService {
     @Transactional
     public UpdateCommentResponse updateComment(UpdateCommentRequest request, String jwtToken, Long commentId){
         String username = jwtUtil.getUsername(jwtToken);
+        Role role = jwtUtil.getRole(jwtToken);
 
         Comment comment = findCommentById(commentId);
 
-        if(comment.isNotWriteUser(username)){
+        if(Role.ADMIN != role && comment.isNotWriteUser(username)){
             throw new IllegalArgumentException("댓글의 작성자만 수정할 수 있습니다.");
         }
         else if(comment.getBoard().isDeleted()){
@@ -71,10 +73,12 @@ public class CommentService {
     @Transactional
     public DeleteCommentResponse deleteComment(String jwtToken, Long commentId){
         String username = jwtUtil.getUsername(jwtToken);
+        Role role = jwtUtil.getRole(jwtToken);
+
         Comment comment = findCommentById(commentId);
         LocalDateTime deletedDateTime = LocalDateTime.now();
 
-        if(comment.isNotWriteUser(username)){
+        if(Role.ADMIN != role && comment.isNotWriteUser(username)){
             throw new IllegalArgumentException("댓글의 작성자만 삭제할 수 있습니다.");
         }
 

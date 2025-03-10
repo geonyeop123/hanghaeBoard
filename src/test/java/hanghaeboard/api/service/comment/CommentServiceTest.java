@@ -9,6 +9,7 @@ import hanghaeboard.domain.board.Board;
 import hanghaeboard.domain.board.BoardRepository;
 import hanghaeboard.domain.comment.Comment;
 import hanghaeboard.domain.comment.CommentRepository;
+import hanghaeboard.domain.user.Role;
 import hanghaeboard.domain.user.User;
 import hanghaeboard.domain.user.UserRepository;
 import hanghaeboard.util.JwtUtil;
@@ -132,6 +133,34 @@ class CommentServiceTest {
         assertThat(updateCommentResponse.getContent()).isEqualTo(modifyComment);
     }
 
+    @DisplayName("어드민 계정은 모든 댓글을 수정할 수 있다.")
+    @Test
+    void modifyComment_admin() {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+                .title("title").content("content").build());
+        Comment savedComment = makeComment(user, board, "comment");
+
+        String modifyComment = "modifyComment";
+        UpdateCommentRequest request = UpdateCommentRequest.builder()
+                .content(modifyComment).build();
+
+        User admin = User.builder()
+                .username("admin")
+                .password("12345678")
+                .role(Role.ADMIN).build();
+
+        String jwtToken = jwtUtil.generateToken(admin, LocalDateTime.now());
+
+
+        // when
+        UpdateCommentResponse updateCommentResponse = commentService.updateComment(request, jwtToken, savedComment.getId());
+
+        // then
+        assertThat(updateCommentResponse.getContent()).isEqualTo(modifyComment);
+    }
+
     @DisplayName("작성자가 아닌 경우 댓글을 수정할 수 없다.")
     @Test
     void modifyComment_notWriter() {
@@ -191,6 +220,28 @@ class CommentServiceTest {
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
+        // when
+        DeleteCommentResponse deleteCommentResponse = commentService.deleteComment(jwtToken, savedComment.getId());
+
+        // then
+        assertThat(deleteCommentResponse.getDeletedDatetime()).isNotNull();
+    }
+    
+    @DisplayName("어드민 계정은 모든 댓글을 삭제할 수 있다.")
+    @Test
+    void deleteComment_admin() {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(Board.builder().writer("yeop").password("12345678")
+                .title("title").content("content").build());
+        Comment savedComment = makeComment(user, board, "comment");
+
+        User admin = User.builder()
+                .username("admin")
+                .password("12345678")
+                .role(Role.ADMIN).build();
+
+        String jwtToken = jwtUtil.generateToken(admin, LocalDateTime.now());
         // when
         DeleteCommentResponse deleteCommentResponse = commentService.deleteComment(jwtToken, savedComment.getId());
 

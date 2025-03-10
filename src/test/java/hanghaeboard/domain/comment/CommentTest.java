@@ -15,7 +15,8 @@ class CommentTest {
     @Test
     void modifyContent() {
         // given
-        Comment comment = makeComment("content");
+        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        Comment comment = makeComment(user, "content");
 
         // when
         comment.modifyContent("modifiedContent");
@@ -28,7 +29,8 @@ class CommentTest {
     @Test
     void isWriteUser() {
         // given
-        Comment comment = makeComment("yeop", "content");
+        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        Comment comment = makeComment(user, "content");
 
         // when
         boolean isNotWriteUser = comment.isNotWriteUser("yeop");
@@ -41,7 +43,8 @@ class CommentTest {
     @Test
     void isNotWriteUser() {
         // given
-        Comment comment = makeComment("yeop", "content");
+        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        Comment comment = makeComment(user, "content");
 
         // when
         boolean isNotWriteUser = comment.isNotWriteUser("another");
@@ -54,7 +57,8 @@ class CommentTest {
     @Test
     void test() {
         // given
-        Comment comment = makeComment("content");
+        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        Comment comment = makeComment(user, "content");
 
         // when
         comment.delete(LocalDateTime.now());
@@ -63,16 +67,10 @@ class CommentTest {
         assertThat(comment.isDeleted()).isTrue();
     }
 
-    Comment makeComment(String writer, String content){
-        User user = User.builder().id(1L).username(writer).password("12345678").build();
-        Board board = Board.builder().id(1L).writer(writer).password("12345678")
+    Comment makeComment(User user, String content){Board board = Board.builder().id(1L).writer("yeop").password("12345678")
                 .title("title").content("content").build();
 
         return Comment.builder().user(user).board(board).content(content).build();
-    }
-
-    Comment makeComment(String content){
-        return makeComment("yeop", content);
     }
 
 }
