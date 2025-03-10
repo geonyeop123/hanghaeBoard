@@ -1,5 +1,6 @@
 package hanghaeboard.util;
 
+import hanghaeboard.domain.user.Role;
 import hanghaeboard.domain.user.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -111,6 +112,25 @@ class JwtUtilTest {
 
         // then
         assertThat(username).isEqualTo("yeop");
+    }
+
+    @DisplayName("token에서 role을 가져올 수 있다.")
+    @Test
+    void getRole() {
+        // given
+        User user = User.builder().username("yeop")
+                .password("12345678")
+                .role(Role.USER)
+                .build();
+
+        String token = generateToken(user, LocalDateTime.now());
+
+        // when
+        Role role = jwtUtil.getRole(token);
+
+        // then
+        assertThat(role).isEqualTo(Role.USER);
+
     }
 
 }

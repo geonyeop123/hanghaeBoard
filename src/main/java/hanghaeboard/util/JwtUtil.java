@@ -1,5 +1,6 @@
 package hanghaeboard.util;
 
+import hanghaeboard.domain.user.Role;
 import hanghaeboard.domain.user.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -48,6 +49,15 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public Role getRole(String token){
+        return Role.valueOf(Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role").toString());
     }
 
     private Date convertToDate(LocalDateTime expiration) {
