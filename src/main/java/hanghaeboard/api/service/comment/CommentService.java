@@ -35,11 +35,11 @@ public class CommentService {
     public CreateCommentResponse createComment(CreateCommentRequest request, String jwtToken, Long boardId){
         String username = jwtUtil.getUsername(jwtToken);
 
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(()-> new EntityNotFoundException("조회된 게시물이 없습니다."));
-
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 회원이 없습니다."));
+
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(()-> new EntityNotFoundException("조회된 게시물이 없습니다."));
 
         Comment comment = Comment.builder().user(user).board(board).content(request.getContent()).build();
         Comment savedComment = commentRepository.save(comment);
