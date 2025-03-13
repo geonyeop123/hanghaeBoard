@@ -5,9 +5,13 @@ import hanghaeboard.api.controller.board.request.UpdateBoardRequest;
 import hanghaeboard.api.exception.exception.AuthorityException;
 import hanghaeboard.api.service.board.response.DeleteBoardResponse;
 import hanghaeboard.api.service.board.response.FindBoardResponse;
+import hanghaeboard.api.service.board.response.FindBoardWithCommentResponse;
 import hanghaeboard.api.service.board.response.UpdateBoardResponse;
+import hanghaeboard.api.service.comment.response.FindCommentResponse;
 import hanghaeboard.domain.board.Board;
 import hanghaeboard.domain.board.BoardRepository;
+import hanghaeboard.domain.comment.Comment;
+import hanghaeboard.domain.comment.CommentRepository;
 import hanghaeboard.domain.user.User;
 import hanghaeboard.domain.user.UserRepository;
 import hanghaeboard.util.JwtUtil;
@@ -40,10 +44,14 @@ class BoardServiceTest {
     private UserRepository userRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     @AfterEach
     void tearDown() {
+        commentRepository.deleteAllInBatch();
         boardRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
     }
@@ -304,4 +312,63 @@ class BoardServiceTest {
                 .hasMessage("권한이 없습니다.");
     }
 
+    @DisplayName("댓글이 포함된 게시물을 조회할 수 있다.")
+    @Test
+    void findBoardByIdWithComments() {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(makeBoard(user, "title", "content"));
+        Long id = board.getId();
+        commentRepository.saveAll(List.of(makeComment(user, board, "comment1")
+                , makeComment(user, board, "comment2")
+                , makeComment(user, board, "comment3")));
+
+        // when
+        FindBoardWithCommentResponse response = boardService.findBoardByIdWithComments(id);
+
+        // then
+        assertThat(response.getWriter()).isEqualTo("yeop");
+        assertThat(response.getTitle()).isEqualTo("title");
+        assertThat(response.getContent()).isEqualTo("content");
+
+        List<FindCommentResponse> comments = response.getComments();
+        assertThat(comments).hasSize(3);
+        assertThat(comments).extracting("writer", "content")
+                .containsExactlyInAnyOrder(
+                        tuple("yeop", "comment1")
+                        , tuple("yeop", "comment2")
+                        ,tuple("yeop", "comment3")
+                );
+    }
+
+    @DisplayName("게시물이 없는 경우 조회할 수 없다.")
+    @Test
+    void findBoardByIdWithComments_notFound() {
+        // given // when // then
+        assertThatThrownBy(() -> boardService.findBoardByIdWithComments(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("조회된 게시물이 없습니다.");
+    }
+
+    @DisplayName("댓글이 포함된 게시물이 삭제된 경우 조회할 수 없다.")
+    @Test
+    void findBoardByIdWithComments_deleted() {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = makeBoard(user, "title", "content");
+
+        board.delete(LocalDateTime.now());
+
+        Board saved = boardRepository.save(board);
+        Long id = saved.getId();
+
+        // when // then
+        assertThatThrownBy(() -> boardService.findBoardByIdWithComments(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("삭제된 게시물입니다.");
+    }
+
+    private static Comment makeComment(User user, Board board, String content) {
+        return Comment.builder().user(user).board(board).content(content).build();
+    }
 }

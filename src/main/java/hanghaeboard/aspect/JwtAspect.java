@@ -24,6 +24,7 @@ public class JwtAspect {
             throw new JwtException("유효하지 않은 JWT 토큰입니다.");
         }
 
+        token = token.substring(7);
         jwtUtil.validateToken(token);
 
     }

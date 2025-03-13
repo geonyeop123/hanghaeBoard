@@ -5,10 +5,7 @@ import hanghaeboard.api.ApiResponse;
 import hanghaeboard.api.controller.board.request.CreateBoardRequest;
 import hanghaeboard.api.controller.board.request.UpdateBoardRequest;
 import hanghaeboard.api.service.board.BoardService;
-import hanghaeboard.api.service.board.response.CreateBoardResponse;
-import hanghaeboard.api.service.board.response.DeleteBoardResponse;
-import hanghaeboard.api.service.board.response.FindBoardResponse;
-import hanghaeboard.api.service.board.response.UpdateBoardResponse;
+import hanghaeboard.api.service.board.response.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +36,8 @@ public class BoardController {
     }
 
     @GetMapping("/api/v1/boards/{id}")
-    public ApiResponse<FindBoardResponse> findBoardById(@PathVariable Long id){
-        return ApiResponse.ok(boardService.findBoardById(id));
+    public ApiResponse<FindBoardWithCommentResponse> findBoardById(@PathVariable Long id){
+        return ApiResponse.ok(boardService.findBoardByIdWithComments(id));
     }
 
     @AuthCheck

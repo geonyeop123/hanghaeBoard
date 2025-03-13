@@ -1,7 +1,11 @@
 package hanghaeboard.domain.board;
 
 import hanghaeboard.api.service.board.response.FindBoardResponse;
+import hanghaeboard.api.service.board.response.FindBoardWithCommentResponse;
+import hanghaeboard.api.service.comment.response.FindCommentResponse;
 import hanghaeboard.config.AuditingConfig;
+import hanghaeboard.domain.comment.Comment;
+import hanghaeboard.domain.comment.CommentRepository;
 import hanghaeboard.domain.user.User;
 import hanghaeboard.domain.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -31,9 +35,12 @@ class BoardRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     @AfterEach
     void tearDown() {
-
+        commentRepository.deleteAllInBatch();
         boardRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
     }
@@ -163,6 +170,54 @@ class BoardRepositoryTest {
 
     private static Board makeBoard(User user, String title, String content) {
         return Board.builder().user(user).title(title).content(content).build();
+    }
+
+    @DisplayName("댓글을 포함한 게시물을 조회할 수 있다.")
+    @Test
+    void findBoardWithComment() {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(makeBoard(user, "title1", "content1"));
+        commentRepository.saveAll(List.of(makeComment(user, board, "comment1")
+                , makeComment(user, board, "comment2")
+                , makeComment(user, board, "comment3")));
+        Long boardId = board.getId();
+        // when
+        FindBoardWithCommentResponse boardWithComment = boardRepository.findBoardWithComment(boardId)
+                .orElseThrow();
+        // then
+        assertThat(boardWithComment.getWriter()).isEqualTo("yeop");
+        assertThat(boardWithComment.getTitle()).isEqualTo("title1");
+        assertThat(boardWithComment.getContent()).isEqualTo("content1");
+
+        List<FindCommentResponse> comments = boardWithComment.getComments();
+        assertThat(comments).extracting("writer", "content")
+                .containsExactlyInAnyOrder(
+                        tuple("yeop", "comment1")
+                        , tuple("yeop", "comment2")
+                        ,tuple("yeop", "comment3")
+                );
+    }
+
+    @DisplayName("댓글을 없는 게시물을 조회할 수 있다.")
+    @Test
+    void findBoardWithCommentIsCommentsEmpty() {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        Board board = boardRepository.save(makeBoard(user, "title1", "content1"));
+        Long boardId = board.getId();
+        // when
+        FindBoardWithCommentResponse boardWithComment = boardRepository.findBoardWithComment(boardId)
+                .orElseThrow();
+        // then
+        assertThat(boardWithComment.getWriter()).isEqualTo("yeop");
+        assertThat(boardWithComment.getTitle()).isEqualTo("title1");
+        assertThat(boardWithComment.getContent()).isEqualTo("content1");
+        assertThat(boardWithComment.getComments()).isEmpty();
+    }
+
+    private static Comment makeComment(User user, Board board, String content) {
+        return Comment.builder().user(user).board(board).content(content).build();
     }
 
 }

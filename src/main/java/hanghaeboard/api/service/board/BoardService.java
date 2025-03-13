@@ -3,10 +3,7 @@ package hanghaeboard.api.service.board;
 import hanghaeboard.api.controller.board.request.CreateBoardRequest;
 import hanghaeboard.api.controller.board.request.UpdateBoardRequest;
 import hanghaeboard.api.exception.exception.AuthorityException;
-import hanghaeboard.api.service.board.response.CreateBoardResponse;
-import hanghaeboard.api.service.board.response.DeleteBoardResponse;
-import hanghaeboard.api.service.board.response.FindBoardResponse;
-import hanghaeboard.api.service.board.response.UpdateBoardResponse;
+import hanghaeboard.api.service.board.response.*;
 import hanghaeboard.domain.board.Board;
 import hanghaeboard.domain.board.BoardRepository;
 import hanghaeboard.domain.user.Role;
@@ -57,6 +54,18 @@ public class BoardService {
         return FindBoardResponse.from(findBoard);
     }
 
+    public FindBoardWithCommentResponse findBoardByIdWithComments(Long id){
+
+        FindBoardWithCommentResponse response = boardRepository.findBoardWithComment(id)
+                .orElseThrow(() -> new EntityNotFoundException("조회된 게시물이 없습니다."));
+
+        if(response.isDeleted()){
+            throw new EntityNotFoundException("삭제된 게시물입니다.");
+        }
+
+        return response;
+    }
+
     @Transactional
     public UpdateBoardResponse updateBoard(UpdateBoardRequest request, Long id, String jwtToken) {
         Board findBoard = findBoardEntityById(id);
@@ -98,6 +107,10 @@ public class BoardService {
     private Board findBoardEntityById(Long id) {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("조회된 게시물이 없습니다."));
+    }
+
+    public FindBoardWithCommentResponse findBoardWithComment(Long id){
+        return null;
     }
 
 }

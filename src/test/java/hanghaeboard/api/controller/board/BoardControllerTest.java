@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hanghaeboard.api.controller.board.request.CreateBoardRequest;
 import hanghaeboard.api.controller.board.request.UpdateBoardRequest;
 import hanghaeboard.api.service.board.BoardService;
-import hanghaeboard.api.service.board.response.CreateBoardResponse;
-import hanghaeboard.api.service.board.response.DeleteBoardResponse;
-import hanghaeboard.api.service.board.response.FindBoardResponse;
-import hanghaeboard.api.service.board.response.UpdateBoardResponse;
+import hanghaeboard.api.service.board.response.*;
+import hanghaeboard.api.service.comment.response.FindCommentResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -142,18 +140,19 @@ class BoardControllerTest {
         ;
     }
 
-    @DisplayName("id로 게시물을 조회할 수 있다.")
+    @DisplayName("id로 게시물을 조회할 경우 게시물 내용과 댓글도 함께 조회된다..")
     @Test
     void findBoardById() throws Exception{
         // given
-        FindBoardResponse response = FindBoardResponse.builder()
+        FindBoardWithCommentResponse response = FindBoardWithCommentResponse.builder()
                 .id(1L)
                 .writer("yeop")
                 .title("title")
                 .content("content")
+                .comments(List.of(FindCommentResponse.builder().writer("yeop").content("comment").build()))
                 .build();
 
-        when(boardService.findBoardById(any())).thenReturn(response);
+        when(boardService.findBoardByIdWithComments(any())).thenReturn(response);
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/boards/1"))
@@ -165,7 +164,11 @@ class BoardControllerTest {
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.writer").value("yeop"))
                 .andExpect(jsonPath("$.data.title").value("title"))
-                .andExpect(jsonPath("$.data.content").value("content"));
+                .andExpect(jsonPath("$.data.content").value("content"))
+                .andExpect(jsonPath("$.data.comments").isArray())
+                .andExpect(jsonPath("$.data.comments[0].writer").value("yeop"))
+                .andExpect(jsonPath("$.data.comments[0].content").value("comment"))
+                ;
     }
 
     @DisplayName("id에 해당하는 게시물이 없는경우 조회되지 않는다.")
@@ -173,7 +176,7 @@ class BoardControllerTest {
     void findBoardById_notFoundBoard() throws Exception{
         // given
 
-        when(boardService.findBoardById(any())).thenThrow(new EntityNotFoundException("조회된 게시물이 없습니다."));
+        when(boardService.findBoardByIdWithComments(any())).thenThrow(new EntityNotFoundException("조회된 게시물이 없습니다."));
 
         // when // then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/boards/1"))
