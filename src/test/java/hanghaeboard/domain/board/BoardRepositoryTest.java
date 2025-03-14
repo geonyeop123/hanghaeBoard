@@ -49,7 +49,7 @@ class BoardRepositoryTest {
     @Test
     void createBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = makeBoard(user, "hi", "hihihi");
 
         // when
@@ -67,7 +67,7 @@ class BoardRepositoryTest {
     @Test
     void findAllBoard() throws Exception {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board1 = makeBoard(user, "title1", "content1");
         Thread.sleep(10);
         Board board2 = makeBoard(user, "title2", "content2");
@@ -92,7 +92,7 @@ class BoardRepositoryTest {
     @Test
     void findAllBoard_notDeleted() throws Exception {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board1 = makeBoard(user, "title1", "content1");
         Thread.sleep(10);
         Board board2 = makeBoard(user, "title2", "content2");
@@ -121,7 +121,7 @@ class BoardRepositoryTest {
     @Test
     void findBoardById() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = makeBoard(user, "title1", "content1");
         Board save = boardRepository.save(board);
         Long id = save.getId();
@@ -138,7 +138,7 @@ class BoardRepositoryTest {
     @Test
     void modifyBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board saved = boardRepository.save(makeBoard(user, "title1", "content1"));
 
         // when
@@ -155,7 +155,7 @@ class BoardRepositoryTest {
     @Test
     void deleteBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board saved = boardRepository.save(makeBoard(user, "title1", "content1"));
         LocalDateTime deletedDatetime = LocalDateTime.of(2025, 2, 24, 14, 40);
         Board board = boardRepository.findById(saved.getId()).orElseThrow();
@@ -176,7 +176,7 @@ class BoardRepositoryTest {
     @Test
     void findBoardWithComment() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(makeBoard(user, "title1", "content1"));
         commentRepository.saveAll(List.of(makeComment(user, board, "comment1")
                 , makeComment(user, board, "comment2")
@@ -203,7 +203,7 @@ class BoardRepositoryTest {
     @Test
     void findBoardWithCommentIsCommentsEmpty() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(makeBoard(user, "title1", "content1"));
         Long boardId = board.getId();
         // when

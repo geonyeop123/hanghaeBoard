@@ -28,7 +28,7 @@ class UserRepositoryTest {
     @Test
     void saveUser() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
 
         // when
         userRepository.save(user);
@@ -40,14 +40,14 @@ class UserRepositoryTest {
         User findUser = all.get(0);
         assertThat(findUser.getId()).isEqualTo(1L);
         assertThat(findUser.getUsername()).isEqualTo("yeop");
-        assertThat(findUser.getPassword()).isEqualTo("12345678");
+        assertThat(findUser.getPassword()).isEqualTo("Pass12!@");
     }
 
     @DisplayName("username으로 회원을 조회할 수 있다.")
     @Test
     void findByUsername() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         userRepository.save(user);
 
         // when

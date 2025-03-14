@@ -2,21 +2,17 @@ package hanghaeboard.domain.user;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-@ActiveProfiles("test")
 class UserTest {
 
     @DisplayName("회원을 생성할 수 있다.")
     @Test
     void createUser() {
         // given // when
-        User user = makeUser("yeop", "password");
+        User user = makeUser("yeop", "Pass123!@#$");
 
         // then
         assertThat(user).isNotNull();
@@ -68,7 +64,7 @@ class UserTest {
     void createUser_passwordRegexp() {
         // given // when // then
         assertThatThrownBy(() -> makeUser("yeop", "pass!!@#$")).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("비밀번호는 소문자 혹은 대문자 영문과 숫자로만 이루어져야 합니다.");
+                .hasMessage("비밀번호는 대소문자 영문과 숫자 및 특수문자로 구성되어야 합니다.");
     }
 
     private static User makeUser(String username, String password, Role role) {
@@ -87,7 +83,7 @@ class UserTest {
     @Test
     void create_adminUser() {
         // given // when
-        User user = makeUser("yeop", "password", Role.ADMIN);
+        User user = makeUser("yeop", "PassWORD1!@#", Role.ADMIN);
 
         // then
         assertThat(user.getRole()).isEqualTo(Role.ADMIN);

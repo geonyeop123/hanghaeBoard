@@ -60,7 +60,7 @@ class BoardServiceTest {
     @Test
     void createBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         CreateBoardRequest request = CreateBoardRequest.builder()
                 .title("title")
                 .content("content")
@@ -81,7 +81,7 @@ class BoardServiceTest {
     @Test
     void findAllBoard() throws Exception{
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         boardRepository.save(makeBoard(user, "title1", "content1"));
         Thread.sleep(10);
         boardRepository.save(makeBoard(user, "title2", "content2"));
@@ -115,7 +115,7 @@ class BoardServiceTest {
     @Test
     void findBoardById() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board saved = boardRepository.save(makeBoard(user, "title2", "content2"));
         Long id = saved.getId();
         // when
@@ -146,7 +146,7 @@ class BoardServiceTest {
     @Test
     void findBoardById_deletedBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = makeBoard(user, "title2", "content2");
         LocalDateTime now = LocalDateTime.now();
         board.delete(now);
@@ -161,7 +161,7 @@ class BoardServiceTest {
     @Test
     void modifyBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
 
         Board saved = boardRepository.save(makeBoard(user, "title", "content"));
@@ -186,7 +186,7 @@ class BoardServiceTest {
     @Test
     void modityBoard_notFoundBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         UpdateBoardRequest request = UpdateBoardRequest.builder()
                 .title("changeTitle")
@@ -204,7 +204,7 @@ class BoardServiceTest {
     @Test
     void modifyBoard_isNotCorrectPassword() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board saved = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = saved.getId();
         UpdateBoardRequest request = UpdateBoardRequest.builder()
@@ -212,7 +212,7 @@ class BoardServiceTest {
                 .content("changeContent")
                 .build();
 
-        User anotherUser = User.builder().username("another").password("12345678").build();
+        User anotherUser = User.builder().username("another").password("Pass12!@").build();
         String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
         // when // then
@@ -225,7 +225,7 @@ class BoardServiceTest {
     @Test
     void modifyBoard_isDeletedBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = makeBoard(user, "title", "content");
         LocalDateTime deletedDatetime = LocalDateTime.now();
@@ -250,7 +250,7 @@ class BoardServiceTest {
     @Test
     void deleteBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board saved = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = saved.getId();
@@ -266,7 +266,7 @@ class BoardServiceTest {
     @Test
     void deleteBoard_already() throws Exception{
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = makeBoard(user, "title", "content");
         LocalDateTime deletedDatetime = LocalDateTime.of(2025, 3, 10, 19, 40);
@@ -286,7 +286,7 @@ class BoardServiceTest {
     @Test
     void deleteBoard_notFoundBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
 
         // when // then
@@ -299,11 +299,11 @@ class BoardServiceTest {
     @Test
     void deleteBoard_isNotWriter() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board saved = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = saved.getId();
 
-        User anotherUser = User.builder().username("another").password("12345678").build();
+        User anotherUser = User.builder().username("another").password("Pass12!@").build();
         String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
         // when // then
@@ -316,7 +316,7 @@ class BoardServiceTest {
     @Test
     void findBoardByIdWithComments() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(makeBoard(user, "title", "content"));
         Long id = board.getId();
         commentRepository.saveAll(List.of(makeComment(user, board, "comment1")
@@ -354,7 +354,7 @@ class BoardServiceTest {
     @Test
     void findBoardByIdWithComments_deleted() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = makeBoard(user, "title", "content");
 
         board.delete(LocalDateTime.now());

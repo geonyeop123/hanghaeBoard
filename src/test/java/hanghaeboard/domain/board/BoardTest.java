@@ -13,7 +13,7 @@ class BoardTest {
     @Test
     void isWriter() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         Board board = makeBoard(user, "title", "content");
         // when
         boolean isNotWriter = board.isNotWriter("yeop");
@@ -26,7 +26,7 @@ class BoardTest {
     @Test
     void isNotWriter() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         Board board = makeBoard(user, "title", "content");
         // when
         boolean isNotWriter = board.isNotWriter("another");
@@ -39,7 +39,7 @@ class BoardTest {
     @Test
     void changeBoard() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         Board board = makeBoard(user, "title", "content");
 
         // when

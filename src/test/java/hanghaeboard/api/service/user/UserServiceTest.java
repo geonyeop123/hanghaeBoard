@@ -38,7 +38,7 @@ class UserServiceTest {
     @Test
     void join() {
         // given
-        CreateUserRequest request = CreateUserRequest.builder().username("yeop").password("12345678").build();
+        CreateUserRequest request = CreateUserRequest.builder().username("yeop").password("Pass12!@").build();
 
         // when
         FindUser savedUser = userService.join(request);
@@ -55,7 +55,7 @@ class UserServiceTest {
         // given
         CreateUserRequest request = CreateUserRequest.builder()
                 .username("yeop")
-                .password("12345678")
+                .password("Pass12!@")
                 .role(Role.ADMIN)
                 .build();
 
@@ -72,7 +72,7 @@ class UserServiceTest {
     @Test
     void join_duplicateUsername() {
         // given
-        userRepository.save(User.builder().username("yeop").password("12345678").build());
+        userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         CreateUserRequest request = CreateUserRequest.builder().username("yeop").password("12345678").build();
 
         // when // then
@@ -84,7 +84,7 @@ class UserServiceTest {
     @Test
     void findUserById() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         User save = userRepository.save(user);
         Long id = save.getId();
         // when
@@ -110,11 +110,11 @@ class UserServiceTest {
     @Test
     void loginGetJwt() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         User save = userRepository.save(user);
         Long id = save.getId();
 
-        LoginRequest request = LoginRequest.builder().username("yeop").password("12345678").build();
+        LoginRequest request = LoginRequest.builder().username("yeop").password("Pass12!@").build();
 
         // when
         LoginResponse response = userService.login(request);
@@ -127,11 +127,11 @@ class UserServiceTest {
     @Test
     void login_notFoundUser() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         User save = userRepository.save(user);
         Long id = save.getId();
 
-        LoginRequest request = LoginRequest.builder().username("yeop1").password("12345678").build();
+        LoginRequest request = LoginRequest.builder().username("yeop1").password("Pass12!@").build();
 
         // when // then
         assertThatThrownBy(() -> userService.login(request)).isInstanceOf(IllegalArgumentException.class)
@@ -142,7 +142,7 @@ class UserServiceTest {
     @Test
     void login_isNotCorrectPassword() {
         // given
-        User user = User.builder().username("yeop").password("12345678").build();
+        User user = User.builder().username("yeop").password("Pass12!@").build();
         User save = userRepository.save(user);
         Long id = save.getId();
 

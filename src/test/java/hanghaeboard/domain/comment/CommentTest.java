@@ -15,7 +15,7 @@ class CommentTest {
     @Test
     void modifyContent() {
         // given
-        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        User user = User.builder().id(1L).username("yeop").password("Pass12!@").build();
         Comment comment = makeComment(user, "content");
 
         // when
@@ -29,7 +29,7 @@ class CommentTest {
     @Test
     void isWriteUser() {
         // given
-        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        User user = User.builder().id(1L).username("yeop").password("Pass12!@").build();
         Comment comment = makeComment(user, "content");
 
         // when
@@ -43,7 +43,7 @@ class CommentTest {
     @Test
     void isNotWriteUser() {
         // given
-        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        User user = User.builder().id(1L).username("yeop").password("Pass12!@").build();
         Comment comment = makeComment(user, "content");
 
         // when
@@ -57,7 +57,7 @@ class CommentTest {
     @Test
     void test() {
         // given
-        User user = User.builder().id(1L).username("yeop").password("12345678").build();
+        User user = User.builder().id(1L).username("yeop").password("Pass12!@").build();
         Comment comment = makeComment(user, "content");
 
         // when

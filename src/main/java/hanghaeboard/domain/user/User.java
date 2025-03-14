@@ -61,7 +61,7 @@ public class User extends BaseEntity {
         if(length < PASSWORD.getMin() || length > PASSWORD.getMax()){
             throw new IllegalArgumentException("비밀번호는 8글자 이상, 15글자 이하여야 합니다.");
         }else if(!Pattern.matches(PASSWORD.getRegexp(), password)){
-            throw new IllegalArgumentException("비밀번호는 소문자 혹은 대문자 영문과 숫자로만 이루어져야 합니다.");
+            throw new IllegalArgumentException("비밀번호는 대소문자 영문과 숫자 및 특수문자로 구성되어야 합니다.");
         }
     }
 

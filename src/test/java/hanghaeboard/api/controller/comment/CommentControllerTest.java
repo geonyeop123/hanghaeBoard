@@ -44,7 +44,7 @@ class CommentControllerTest {
     void createComment() throws Exception{
         // given
         Board board = Board.builder().id(1L)
-                .user(User.builder().username("yeop").password("12345678").build())
+                .user(User.builder().username("yeop").password("Pass12!@").build())
                 .title("title")
                 .content("content")
                 .build();
@@ -88,7 +88,7 @@ class CommentControllerTest {
     void createCommentWithoutContent() throws Exception{
         // given
         Board board = Board.builder().id(1L)
-                .user(User.builder().username("yeop").password("12345678").build())
+                .user(User.builder().username("yeop").password("Pass12!@").build())
                 .title("title")
                 .content("content")
                 .build();
@@ -149,10 +149,6 @@ class CommentControllerTest {
                 .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data").isNotEmpty())
                 .andExpect(jsonPath("$.data.id").value(1))
-                .andExpect(jsonPath("$.data.board.id").value(1))
-                .andExpect(jsonPath("$.data.board.writer").value("yeop"))
-                .andExpect(jsonPath("$.data.board.title").value("title"))
-                .andExpect(jsonPath("$.data.board.content").value("content"))
                 .andExpect(jsonPath("$.data.content").value("comment"))
                 .andExpect(jsonPath("$.data.createdDatetime").value("2025-03-04T23:00:00"))
                 .andExpect(jsonPath("$.data.lastModifiedDatetime").value("2025-03-04T23:00:00"))

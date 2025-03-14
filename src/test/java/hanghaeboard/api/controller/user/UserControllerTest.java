@@ -45,7 +45,7 @@ class UserControllerTest {
         // given
         CreateUserRequest request = CreateUserRequest.builder()
                 .username("yeop")
-                .password("12345678")
+                .password("Pass12!@")
                 .build();
 
         FindUser response = FindUser.builder()
@@ -75,7 +75,7 @@ class UserControllerTest {
         // given
         CreateUserRequest request = CreateUserRequest.builder()
                 .username("yeop")
-                .password("12345678")
+                .password("Pass12!@")
                 .role(Role.ADMIN)
                 .build();
 
@@ -107,7 +107,7 @@ class UserControllerTest {
     void join_duplicateUsername() throws Exception{
         CreateUserRequest request = CreateUserRequest.builder()
                 .username("yeop")
-                .password("yeop1234")
+                .password("Pass12!@")
                 .build();
 
         when(userService.join(any())).thenThrow(new DuplicateKeyException("이미 존재하는 ID입니다."));
@@ -130,7 +130,7 @@ class UserControllerTest {
         // given
         LoginRequest request = LoginRequest.builder()
                 .username("yeop")
-                .password("12345678")
+                .password("Pass12!@")
                 .build();
 
         LoginResponse response = LoginResponse.builder()
@@ -159,7 +159,7 @@ class UserControllerTest {
         // given
         LoginRequest request = LoginRequest.builder()
                 .username("yeop")
-                .password("12345678")
+                .password("Pass12!@")
                 .build();
 
 
@@ -183,7 +183,7 @@ class UserControllerTest {
         // given
         LoginRequest request = LoginRequest.builder()
                 .username("yeop")
-                .password("12345678")
+                .password("Pass12!@")
                 .build();
 
         when(userService.login(any())).thenThrow(new InvalidPasswordException("비밀번호가 올바르지 않습니다."));

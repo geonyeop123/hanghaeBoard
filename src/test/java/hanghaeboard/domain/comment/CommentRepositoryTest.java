@@ -82,7 +82,7 @@ class CommentRepositoryTest {
     }
 
     Comment makeComment(String content){
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
 

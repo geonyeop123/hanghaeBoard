@@ -61,7 +61,7 @@ class CommentServiceTest {
     void createComment() {
         // given
 
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
@@ -83,7 +83,7 @@ class CommentServiceTest {
     @Test
     void createComment_notFoundBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
 
         CreateCommentRequest createCommentRequest = CreateCommentRequest.builder()
@@ -99,7 +99,7 @@ class CommentServiceTest {
     @Test
     void modifyComment() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
@@ -120,7 +120,7 @@ class CommentServiceTest {
     @Test
     void modifyComment_admin() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
@@ -131,7 +131,7 @@ class CommentServiceTest {
 
         User admin = User.builder()
                 .username("admin")
-                .password("12345678")
+                .password("Pass12!@")
                 .role(Role.ADMIN).build();
 
         String jwtToken = jwtUtil.generateToken(admin, LocalDateTime.now());
@@ -148,12 +148,12 @@ class CommentServiceTest {
     @Test
     void modifyComment_notWriter() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
-        User anotherUser = User.builder().id(1L).username("another").password("12345678").build();
+        User anotherUser = User.builder().id(1L).username("another").password("Pass12!@").build();
         String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
         String modifyComment = "modifyComment";
@@ -170,7 +170,7 @@ class CommentServiceTest {
     @Test
     void modifyComment_deletedBoard() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
@@ -197,7 +197,7 @@ class CommentServiceTest {
     @Test
     void deleteComment() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         String jwtToken = jwtUtil.generateToken(user, LocalDateTime.now());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
@@ -214,14 +214,14 @@ class CommentServiceTest {
     @Test
     void deleteComment_admin() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
         User admin = User.builder()
                 .username("admin")
-                .password("12345678")
+                .password("Pass12!@")
                 .role(Role.ADMIN).build();
 
         String jwtToken = jwtUtil.generateToken(admin, LocalDateTime.now());
@@ -236,12 +236,12 @@ class CommentServiceTest {
     @Test
     void deleteComment_notWriteUser() {
         // given
-        User user = userRepository.save(User.builder().username("yeop").password("12345678").build());
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
         Board board = boardRepository.save(Board.builder().user(user)
                 .title("title").content("content").build());
         Comment savedComment = makeComment(user, board, "comment");
 
-        User anotherUser = User.builder().username("another").password("12345678").build();
+        User anotherUser = User.builder().username("another").password("Pass12!@").build();
         String jwtToken = jwtUtil.generateToken(anotherUser, LocalDateTime.now());
 
         // when //then

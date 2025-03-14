@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum UserValidation {
     USERNAME(4, 10, "[a-z0-9]+"),
-    PASSWORD(8, 15, "[a-zA-Z0-9]+");
+    PASSWORD(8, 15, "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@#$!%*?&])[A-Za-z\\d$@$#!%*?&]{8,}");
 
     private final int min;
     private final int max;
