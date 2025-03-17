@@ -42,7 +42,7 @@ class BoardControllerTest {
     @Test
     void test() throws Exception {
         // given
-        FindBoardResponse response = FindBoardResponse.builder()
+        FindBoardWithCommentResponse response = FindBoardWithCommentResponse.builder()
                 .id(1L)
                 .writer("yeop")
                 .title("title")

@@ -39,7 +39,7 @@ public class BoardService {
         return CreateBoardResponse.from(savedBoard);
     }
 
-    public List<FindBoardResponse> findAllBoard(){
+    public List<FindBoardWithCommentResponse> findAllBoard(){
         return boardRepository.findAllBoard();
     }
 

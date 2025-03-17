@@ -21,7 +21,7 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping("/api/v1/boards")
-    public ApiResponse<List<FindBoardResponse>> getBoards(){
+    public ApiResponse<List<FindBoardWithCommentResponse>> getBoards(){
         return ApiResponse.ok(boardService.findAllBoard());
     }
 

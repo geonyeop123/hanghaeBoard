@@ -90,7 +90,7 @@ class BoardServiceTest {
         Thread.sleep(10);
 
         // when
-        List<FindBoardResponse> allBoard = boardRepository.findAllBoard();
+        List<FindBoardWithCommentResponse> allBoard = boardService.findAllBoard();
 
         // then
         assertThat(allBoard).extracting("writer", "title", "content")
@@ -100,15 +100,34 @@ class BoardServiceTest {
                         , tuple("yeop", "title1", "content1"));
     }
 
-    @DisplayName("전체 게시물을 조회할 대 게시물이 없는 경우 빈 리스트가 조회된다.")
+    @DisplayName("전체 게시물을 조회할때 게시물이 없는 경우 빈 리스트가 조회된다.")
     @Test
     void findAllBoardByEmpty() {
 
         // given // when
-        List<FindBoardResponse> allBoard = boardService.findAllBoard();
+        List<FindBoardWithCommentResponse> allBoard = boardService.findAllBoard();
 
         // then
         assertThat(allBoard).isEmpty();
+    }
+
+    @DisplayName("전체 게시물을 조회할 때 댓글 목록도 함께 조회된다.")
+    @Test
+    void findAllBoardWithComments() {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
+        Board board = boardRepository.save(makeBoard(user, "title1", "content1"));
+        commentRepository.saveAll(List.of(
+                makeComment(user, board, "comment1")
+                , makeComment(user, board, "comment2")));
+        // when
+        List<FindBoardWithCommentResponse> allBoard = boardService.findAllBoard();
+        // then
+        assertThat(allBoard).hasSize(1);
+        List<FindCommentResponse> comments = allBoard.get(0).getComments();
+        assertThat(comments).hasSize(2);
+        assertThat(comments).extracting("writer", "content")
+                .containsExactlyInAnyOrder(tuple("yeop", "comment1"), tuple("yeop", "comment2"));
     }
 
     @DisplayName("id로 게시물을 조회할 수 있다.")

@@ -16,6 +16,7 @@ public class FindBoardWithCommentResponse {
     private String writer;
     private String title;
     private String content;
+
     private List<FindCommentResponse> comments = new ArrayList<>();
 
     private LocalDateTime createdDatetime;
@@ -28,7 +29,7 @@ public class FindBoardWithCommentResponse {
         this.writer = writer;
         this.title = title;
         this.content = content;
-        this.comments = comments;
+        this.comments = comments == null ? new ArrayList<>() : comments;
         this.createdDatetime = createdDatetime;
         this.lastModifiedDatetime = lastModifiedDatetime;
         this.deletedDatetime = deletedDatetime;

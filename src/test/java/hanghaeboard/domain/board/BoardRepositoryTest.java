@@ -1,6 +1,5 @@
 package hanghaeboard.domain.board;
 
-import hanghaeboard.api.service.board.response.FindBoardResponse;
 import hanghaeboard.api.service.board.response.FindBoardWithCommentResponse;
 import hanghaeboard.api.service.comment.response.FindCommentResponse;
 import hanghaeboard.config.AuditingConfig;
@@ -77,7 +76,7 @@ class BoardRepositoryTest {
         boardRepository.saveAll(List.of(board1, board2, board3));
 
         // when
-        List<FindBoardResponse> allBoard = boardRepository.findAllBoard();
+        List<FindBoardWithCommentResponse> allBoard = boardRepository.findAllBoard();
 
         // then
         assertThat(allBoard).extracting("writer", "title", "content")
@@ -106,7 +105,7 @@ class BoardRepositoryTest {
         boardRepository.saveAll(List.of(board1, board2, board3));
 
         // when
-        List<FindBoardResponse> allBoard = boardRepository.findAllBoard();
+        List<FindBoardWithCommentResponse> allBoard = boardRepository.findAllBoard();
 
         // then
         assertThat(allBoard).hasSize(2);
@@ -115,6 +114,58 @@ class BoardRepositoryTest {
                         tuple( "yeop", "title2", "content2")
                         , tuple( "yeop", "title1", "content1")
                 );
+    }
+
+    @DisplayName("게시물 목록을 조회할 때 댓글 목록도 함께 조회된다.")
+    @Test
+    void findAllBoardWithComments() throws Exception {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
+        Board board1 = makeBoard(user, "title1", "content1");
+        Board board2 = makeBoard(user, "title2", "content2");
+
+        boardRepository.saveAll(List.of(board1, board2));
+        commentRepository.saveAll(List.of(
+                makeComment(user, board1, "comment1")
+                , makeComment(user, board2, "comment2")
+        ));
+
+        // when
+        List<FindBoardWithCommentResponse> allBoard = boardRepository.findAllBoard();
+
+        // then
+        assertThat(allBoard).hasSize(2);
+        assertThat(allBoard).extracting("writer", "title", "content")
+                .containsExactly(
+                        tuple( "yeop", "title2", "content2")
+                        , tuple( "yeop", "title1", "content1")
+                );
+        List<FindCommentResponse> comments = allBoard.get(0).getComments();
+        assertThat(comments.get(0).getWriter()).isEqualTo("yeop");
+        assertThat(comments.get(0).getContent()).isEqualTo("comment2");
+    }
+
+    @DisplayName("게시물 목록을 조회할 때 댓글 목록은 생성일자 기준 내림차순이다.")
+    @Test
+    void findAllBoardWithCommentsOrderByDesc() throws Exception {
+        // given
+        User user = userRepository.save(User.builder().username("yeop").password("Pass12!@").build());
+        Board board1 = makeBoard(user, "title1", "content1");
+
+        boardRepository.saveAll(List.of(board1));
+        commentRepository.save(makeComment(user, board1, "comment1"));
+        Thread.sleep(10);
+        commentRepository.save(makeComment(user, board1, "comment2"));
+
+        // when
+        List<FindBoardWithCommentResponse> allBoard = boardRepository.findAllBoard();
+
+        // then
+        List<FindCommentResponse> comments = allBoard.get(0).getComments();
+        assertThat(comments).extracting("writer", "content")
+                .containsExactly(
+                        tuple("yeop", "comment2")
+                        , tuple("yeop", "comment1"));
     }
 
     @DisplayName("게시물을 id로 조회할 수 있다.")
